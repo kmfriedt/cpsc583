@@ -86,15 +86,19 @@ function genModelAccel(cars, cols) {
     result.push(second);
     return result
 }
+
 // This gets rid of columns that we don't want to use as axis
-function removeKeys(arr){
-    var col1 = arr.slice(2,6),
+function removeColumns(arr){
+    // removes brand accel efficiency charge price price_range
+    var col1 = arr.slice(2,5),
         col2 = arr.slice(7,9),
         arr = col1.concat(col2);
 
     return arr;
 
 }
+
+
 
 function colorBlobDots() {
     // The blobs are drawn one at a time. Get all the points to be that blobs color
@@ -112,7 +116,7 @@ function colorBlobDots() {
     //TODO 3 colours and 7 axis
 }
 
-function findBrands(d,names){
+function genBrandList(d,names){
     var result = []
     for (var i = 0; i < d.length; i++){
         for(var j = 0; j < names.length; j++){
@@ -123,42 +127,48 @@ function findBrands(d,names){
     }
     return result
 }
+function genCompareJson(d, names){
+    var result = []
 
+
+}
 
 
 function makeRadar(id, data) {
+
+    // Setup the data
+    var features = data.columns;
+    console.log(data);
+    var carNames = ["Tesla", "Audi", "Volkswagen", "Smart"]; //TODO get the brands from the interactions
+
+    // get the rows of data for the brand names in carNames
+    var cars = genBrandList(data, carNames)
+    // console.log(cars);
+
+
+    // console.log(features);
+    features = removeColumns(features);
+    // console.log(features);
+    var carsJ = genAxisJson(cars,features);
+    console.log(carsJ);
+
+
+    //Chart options
+    var color = d3.scaleOrdinal(d3.schemeCategory10)
+    // .range(["#EDC951","#CC333F","#00A0B0"])
+
     let viewBox = document.getElementById(id).viewBox.baseVal;
     let totalWidth = viewBox.width;
     let totalHeight = viewBox.height;
     let margins = {top: 70, right: 40, bottom: 70, left: 40};
     let innerWidth = totalWidth - margins.left - margins.right;
     let innerHeight = totalHeight - margins.top - margins.bottom;
-
-
-    // Setup the data
-    var columns = data.columns;
-    console.log(data);
-    var carNames = ["Tesla", "Audi", "Volkswagen", "Nissan", "Smart"]; //TODO get the brands from the interactions
-
-    var cars = findBrands(data, carNames)
-    console.log(cars);
-
-    columns = removeKeys(columns);
-    var carsJ = genAxisJson(cars,columns);
-    console.log(carsJ);
-
-
-    //Chart options
-
-
-    var color = d3.scaleOrdinal(d3.schemeCategory10)
-    // .range(["#EDC951","#CC333F","#00A0B0"])
-
+    // set up image options to easily pass info to functions
     var imgOpts = {
         w: innerWidth,
         h: innerHeight,
         margin: margins, //TODO may have to get rid of margins and put it's data here
-        maxValue: 750,
+        maxValue: 550,
         levels: 5,
         roundStrokes: true,
         color: color,
@@ -171,6 +181,7 @@ function makeRadar(id, data) {
     };
 
     var gasConst = {
+        avgTopSpeed: 190,
         avgRange: 660,
         avgTrip: 160,
         avgAcceleration: 8.0,
@@ -178,8 +189,8 @@ function makeRadar(id, data) {
         avgPriceK: 33.464
     }
 
-
-    var allAxis = columns,
+    // setup axis and radius
+    var allAxis = features,
         totalAxes = allAxis.length,
         radius = Math.min(imgOpts.w/2, imgOpts.h/2), 	//Radius of the outermost circle
         Format = d3.format('.2f'),			 	//Percentage formatting
@@ -433,3 +444,9 @@ function makeRadar(id, data) {
 
 }
 
+function makeRadarCompare(id, data){
+    //generate data to compare 1 gas car to 1 or 2 electric
+
+    var axis = ['topseed', 'range', 'pricek', 'cost/year', 'cost/100km']
+
+}
