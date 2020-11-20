@@ -116,7 +116,7 @@ function colorBlobDots() {
     //TODO 3 colours and 7 axis
 }
 
-function genBrandList(d,names){
+function genBrandData(d,names){
     var result = []
     for (var i = 0; i < d.length; i++){
         for(var j = 0; j < names.length; j++){
@@ -134,26 +134,35 @@ function genCompareJson(d, names){
 }
 
 
-function makeRadar(id, data) {
+function makeRadar(id, data, brandsList, axisList) {
 
-    // Setup the data
-    var features = data.columns;
-    console.log(data);
+
+// Setup the data
     var carNames = ["Tesla", "Audi", "Volkswagen", "Smart"]; //TODO get the brands from the interactions
-
+    console.log(data);
+    if(typeof brandsList !== "undefined"){
+        carNames = brandsList;
+    }
     // get the rows of data for the brand names in carNames
-    var cars = genBrandList(data, carNames)
-    // console.log(cars);
+    var cars = genBrandData(data, carNames)
 
+    var features = data.columns;
+    // console.log(features);
 
-    // console.log(features);
-    features = removeColumns(features);
-    // console.log(features);
+    // If no axis Argument passed then default to removeColumns function
+    if(typeof axisList !== "undefined"){
+        features = axisList;
+    }
+    else{
+        features = removeColumns(features);
+        // console.log(features);
+    }
+
     var carsJ = genAxisJson(cars,features);
     console.log(carsJ);
 
 
-    //Chart options
+    //Setup the Chart Options
     var color = d3.scaleOrdinal(d3.schemeCategory10)
     // .range(["#EDC951","#CC333F","#00A0B0"])
 
@@ -197,11 +206,10 @@ function makeRadar(id, data) {
         angleSlice = Math.PI * 2 / totalAxes;		//The width in radians of each "slice"
 
     console.log(allAxis)
-    console.log("Total Axes: " + totalAxes.toString())
-    console.log("Radius: "+ radius.toString())
 
     //Scale for the radius
-    // imgOpts.maxValue = d3.max(carsJ, function(i){return d3.max(i.map(function(o){return o.value;}))});
+    // var max = d3.max(carsJ, function(i){return d3.max(i.map(function(o){return o.value;}))});
+    // console.log(max) //TODO fix this so max value isn't hard coded
 
 
     var rScale = d3.scaleLinear()
@@ -247,7 +255,7 @@ function makeRadar(id, data) {
         .enter()
         .append("circle")
         .attr("class", "gridCircle")
-        .attr("r", (d, i) => {return radius/imgOpts.levels*d;})
+        .attr("r", (d) => {return radius/imgOpts.levels*d;})
         .style("fill", "#CDCDCD")
         .style("stroke", "#CDCDCD")
         .style("fill-opacity", imgOpts.opacityCircles)
@@ -353,7 +361,7 @@ function makeRadar(id, data) {
 
     var colorIndex = -1,
         axisNumber = 0;
-    //Append the circles
+    //Append the circles //TODO maybe make text here based on the circle positions make it opaque unless mouse over
     blobWrapper.selectAll(".radarCircle")
         .data((d,i) => { return d; })
         // .data(radarData)
@@ -381,11 +389,17 @@ function makeRadar(id, data) {
 
     //Append a set of invisible circles on top for the mouseover pop-up
     blobCircleWrapper.selectAll(".radarInvisibleCircle")
-        .data( function (d,i) { return d; })
+        .data( (d,i) => {
+            // console.log(d)
+            // console.log(d[2].value)
+
+            return d;
+        })
         .enter().append("circle")
         .attr("class", "radarInvisibleCircle")
         .attr("r", imgOpts.dotRadius*1.5)
         .attr("cx", (d,i) => {
+
             // console.log(rScale(d.value) * Math.cos(angleSlice*i - Math.PI/2))
             return rScale(d.value) * Math.cos(angleSlice*i - Math.PI/2);
         })
@@ -395,7 +409,7 @@ function makeRadar(id, data) {
         .on("mouseover", function (d,i) {
             newX =  parseFloat(d3.select(this).attr('cx')) - 10;
             newY =  parseFloat(d3.select(this).attr('cy')) - 10;
-            console.log(d.value)// TODO this is undefined
+            // console.log(d.value)// TODO this is undefined
             tooltip
                 .attr('x', newX)
                 .attr('y', newY)
@@ -444,7 +458,9 @@ function makeRadar(id, data) {
 
 }
 
-function makeRadarCompare(id, data){
+function makeRadarCompare(id, data, brandsList, axisList
+
+){
     //generate data to compare 1 gas car to 1 or 2 electric
 
     var axis = ['topseed', 'range', 'pricek', 'cost/year', 'cost/100km']
