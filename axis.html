@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Axis Attempts</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+
+
+    <link rel="stylesheet" href="index.css">
+
+</head>
+<body>
+
+
+
+    <h1>Price and Range</h1>
+    <p>The scatter chart is not my primary visualization.
+        It is mainly there to allow the user to narrow down on which cars it would like to look at.
+        The first variation is price versus range for each model.
+        This chart was quite cramped so I did one with the cars grouped by brand as well.
+        I plan to allow the users to change the price to one that they would be willing to pay for a vehicle.
+        I also plan to allow them to change the range that they would want.
+        I also need to generate a legend for the graph. </p>
+    <svg id="scatter2" width="800" height="600" viewBox="0 0 800 600">
+        <rect class="bg"></rect>
+    </svg>
+    <script src="scatter2.js"></script>
+    <script>
+        setupModel("scatter2", "price", "range", "Price (CDN$)", "Range (km)", "avgPrice","avgTrip");
+    </script>
+
+    <h1>Brand Price and Range</h1>
+    <svg id="scatter3" width="800" height="600" viewBox="0 0 800 600">
+        <rect class="bg"></rect>
+    </svg>
+    <script src="scatter2.js"></script>
+    <script>
+        setupBrand("scatter3", "price", "range", "Price (CDN$)", "Range (km)" , "avgPrice","avgTrip");
+    </script>
+
+<h1>Model Acceleration</h1>
+    <p>This was just a test to see how to use a category at the bottom.
+    I still have to figure out the axis at the bottom and the grid lines.
+    Also there are some issues with the data fitting in the white box.</p>
+    <svg id="scatter4" width="800" height="600" viewBox="0 0 800 600">
+        <rect class="bg"></rect>
+    </svg>
+    <script src="scatter2.js"></script>
+    <script>
+        setupModel("scatter4", "model", "accel", "Model", "Acceleration 0-60 (s)", "none", "avgAcceleration" );
+    </script>
+
+<h1>Brand Acceleration</h1>
+    <p> Just by brand as well</p>
+<svg id="scatter5" width="800" height="600" viewBox="0 0 800 600">
+    <rect class="bg"></rect>
+</svg>
+<script src="scatter2.js"></script>
+<script>
+    setupBrand("scatter5", "brand", "accel", "Brand", "Acceleration 0-60 (s)", "none", "avgAcceleration" );
+</script>
+
+
+    <h1>4 Brands and 6 features</h1>
+    <p>This radar chart was adapted from the work done by Nadieh Bremmer
+        found at http://bl.ocks.org/nbremer/21746a9668ffdf6d8242.
+        I had to adjust the code to work with version 6 and with m data.
+        This variation looked at 4 vehicles and 6 key features of those vehicles.
+        I would like to add more features to fill in the chart a little more. I also found that
+        I need to order the blobs to make sure that you can highlight each of them with mouse over. </p>
+
+    <svg id="radar3" width="800" height="600" viewBox="0 0 800 600">
+        <rect class="bg"></rect>
+    </svg>
+    <script src="radar3.js"></script>
+    <script>
+        setupRadar3("radar3");
+    </script>
+
+    <h1>Acceleration on the left and Range on the Right the dot color represents a brand.
+    The blob color represents the feature being measured. Blue for Range, Orange for Acceleration.</h1>
+    <p>This was an attempt to show information on each side of the central axis.
+        This one shows the vehicles acceleration on the left and range on the right.
+        I need to include a legend for this and data labels.
+        I found this quite hard to implement, and I am still not happy with how it looks.
+        The dividing axis needs to be rotated and I don’t think the visual works well with blobs.
+        I should do a line to each data point instead.
+        I wanted to use a linear line for the blobs but it cut through some of the data points.
+        I need to find a better alternative. </p>
+    <svg id="radar4" width="800" height="600" viewBox="0 0 800 600">
+        <rect class="bg"></rect>
+    </svg>
+    <script src="radar3.js"></script>
+    <script>
+        setupRadar4("radar4");
+    </script>
+
+    <h1>Acceleration on the Left Range on the Right, The blob color represents a car</h1>
+    <p>This was another attempt to show the information based on two features in the same radar chart.
+        This time I just used a blob for each half to show the information for a vehicle.
+        I tried this to see how it would look and to see if I could order the data
+        to allow you to highlight each blob on mouse over.
+        I did this for the left blob but not for the right so I could see the difference. </p>
+    <svg id="radar5" width="800" height="600" viewBox="0 0 800 600">
+    <rect class="bg"></rect>
+    </svg>
+    <script src="radar3.js"></script>
+    <script>
+        setupRadar5("radar5");
+    </script>
+
+<!--<h1>Now try arcs</h1>-->
+
+<!--<svg id="arc1" width="800" height="600" viewBox="0 0 800 600">-->
+<!--    <rect class="bg"></rect>-->
+<!--</svg>-->
+<!--<script src="arcs1.js"></script>-->
+<!--<script>-->
+<!--    setupArc1("arc1");-->
+<!--</script>-->
+
+</body>
+</html>
