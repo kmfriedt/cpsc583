@@ -3,6 +3,8 @@
 // d3 = require("d3")
 var _scatChart;
 
+var _brandChart;
+
 function setupModel(id, xax, yax, xtitle, ytitle, avg1, avg2){
     //Changed this to import the brands only
     d3.csv("evdata2.csv").then(function (d){
@@ -27,6 +29,43 @@ function drawBackground(chart, left, top, width, height){
         .style("fill", "white");
 }
 
+function dataMainpulation(data){
+
+    // each row is a JSON object, each feature is stored in a key for that object
+    // all objects are stored in a single array
+    // each row is an object in the array
+
+    console.log(data[0]) // this will get you the first object in the array
+    console.log(Object.keys(data[0])); // get the names of all the columns.
+    console.log(d3.groups(data, d =>d.brand));
+    var brandGroups = d3.groups(data, d => d.brand);
+    console.log(brandGroups);
+    brandGroups = genBrandGroups(brandGroups);
+    console.log(brandGroups);
+    //filter the data
+    console.log(data.filter(d => d.range >= 400));
+}
+
+function genBrandGroups(data){
+    var array = []
+    var brand;
+
+    data = d3.groups(data, d => d.brand);
+
+    for(var i = 0; i < data.length; i++){
+
+        array.push( { "brand": data[i][0],
+        "accel": d3.mean(data[i][1], d => d.accel), // gives you the mean acceleration
+        "topspeed": d3.mean(data[i][1], d => d.topspeed),
+        "range": d3.mean(data[i][1], d => d.range),
+        "efficiency": d3.mean(data[i][1], d => d.efficiency),
+        "price" : d3.mean(data[i][1], d => d.price),
+        "pricek": d3.mean(data[i][1], d => d.pricek),
+        "price_km": d3.mean(data[i][1], d => d.price_km),
+        "price_range": d3.mean(data[i][1], d => d.price_range) })
+    }
+    return array
+}
 
 function drawYAxis(text, chart, scale, left, top, width, height){
 
@@ -172,24 +211,12 @@ function drawScatter(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
 
     //Setup color scale
 
-    console.log(data)
+    console.log(data);
 
-    // var brandData = d3.rollups(data, v => {return {
-    //         accel: d3.mean(v, function(d) { return d.accel; }),
-    //         topspeed: d3.mean(v, function(d) { return d.topspeed; }),
-    //         range: d3.mean(v, function(d) { return d.range; }),
-    //         efficiency: d3.mean(v, function(d) { return d.efficiency; }),
-    //         charge: d3.mean(v, function(d) { return d.charge; }),
-    //         price: d3.mean(v, function(d) { return d.price; }),
-    //         pricek: d3.mean(v, function(d) { return d.pricek; }),
-    //         price_km: d3.mean(v, function(d) { return d.price_km; }),
-    //         price_range: d3.mean(v, function(d) { return d.price_range; })
-    //
-    //     }; })
-    //     .entries(data);
-    // console.log(brandData)
-    // var colorLabels = d3.map(data, function(d){return (d.brand)}).keys()
-    var colorLabels = []
+    var brandData = genBrandGroups(data);
+    console.log(data);
+    console.log(brandData);
+    var colorLabels = [];
     for (var i = 0; i < data.length; i++){
         colorLabels.push(data[i].brand);
     }
