@@ -406,19 +406,20 @@ function makeRadar(id, data, brandsList, axisList) {
         .attr("cy", function (d,i) { return rScale(d.value) * Math.sin(angleSlice*i - Math.PI/2); })
         .style("fill", "none")
         .style("pointer-events", "all")
-        .on("mouseover", function (d,i) {
+        .on("mouseover", function (event, d) {  //TODO had to add event to get this to work
             newX =  parseFloat(d3.select(this).attr('cx')) - 10;
             newY =  parseFloat(d3.select(this).attr('cy')) - 10;
-            // console.log(d.value)// TODO this is undefined
+            console.log(d)
+            console.log(d.value)
             tooltip
                 .attr('x', newX)
                 .attr('y', newY)
-                .text(Format(d.value))  //TODO get tool tip to work
+                .text(Format(d.value))
                 .transition().duration(200)
                 .style('opacity', 1);
         })
         .on("mouseout", function(){
-            tooltip.transition().duration(200)
+            tooltip.transition().duration(500)
                 .style("opacity", 0);
         });
 

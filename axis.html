@@ -21,22 +21,26 @@
         I plan to allow the users to change the price to one that they would be willing to pay for a vehicle.
         I also plan to allow them to change the range that they would want.
         I also need to generate a legend for the graph. </p>
-<!--    <svg id="scatter2" width="800" height="600" viewBox="0 0 800 600">-->
-<!--        <rect class="bg"></rect>-->
-<!--    </svg>-->
-<!--    <script src="scatter.js"></script>-->
-<!--    <script>-->
-<!--        setupModel("scatter2", "price", "range", "Price (CDN$)", "Range (km)", "avgPrice","avgTrip");-->
-<!--    </script>-->
+    <svg id="scatter2" width="800" height="600" viewBox="0 0 800 600">
+        <rect class="bg"></rect>
+    </svg>
+    <script src="scatter.js"></script>
+    <script>
+        setupModel("scatter2", "price", "range", "Price (CDN$)", "Range (km)", "avgPrice", "avgTrip");
+    </script>
+    <input value="Model / Brand" onclick="makeToggled(
+        'scatter2', 'price', 'range', 'Price (CDN$)', 'Range (km)', 'avgPrice', 'avgTrip')"
+           type="button"/>
+    <input id="inlin" type="text" onchange="linplot()">
 
-<!--    <h1>Brand Price and Range</h1>-->
-<!--    <svg id="scatter3" width="800" height="600" viewBox="0 0 800 600">-->
-<!--        <rect class="bg"></rect>-->
-<!--    </svg>-->
-<!--    <script src="scatter.js"></script>-->
-<!--    <script>-->
-<!--        setupBrand("scatter3", "price", "range", "Price (CDN$)", "Range (km)" , "avgPrice","avgTrip");-->
-<!--    </script>-->
+    <h1>Brand Price and Range</h1>
+    <svg id="scatter3" width="800" height="600" viewBox="0 0 800 600">
+        <rect class="bg"></rect>
+    </svg>
+    <script src="scatter.js"></script>
+    <script>
+        setupBrand("scatter3", "price", "range", "Price (CDN$)", "Range (km)" , "avgPrice", "avgTrip");
+    </script>
 
 <h1>Model Acceleration</h1>
     <p>This was just a test to see how to use a category at the bottom.
