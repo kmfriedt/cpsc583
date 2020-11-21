@@ -5,16 +5,24 @@ var _scatChart;
 
 var _brandChart;
 
+const margins = {top: 20, right: 30, bottom: 60, left: 60};
+
 function setupModel(id, xax, yax, xtitle, ytitle, avg1, avg2){
     //Changed this to import the brands only
     d3.csv("evdata2.csv").then(function (d){
-       drawScatter(id, d, xax, yax, xtitle, ytitle, avg1, avg2)
-    });
+
+       _scatChart = new scatterChart(id, d, xax, yax, xtitle, ytitle, avg1, avg2)
+   });
+
+
+
 }
 function setupBrand(id, xax, yax, xtitle, ytitle, avg1, avg2){
     //Changed this to import the brands only
     d3.csv("brandAvg.csv").then(function (d){
-        drawScatter(id, d, xax, yax, xtitle, ytitle, avg1, avg2)
+
+
+        _brandChart = new scatterChart(id, d, xax, yax, xtitle, ytitle, avg1, avg2)
     });
 }
 
@@ -28,7 +36,7 @@ function drawBackground(chart, left, top, width, height){
         .attr("height", height)
         .style("fill", "white");
 }
-
+// attempts at data manipulation
 function dataMainpulation(data){
 
     // each row is a JSON object, each feature is stored in a key for that object
@@ -121,20 +129,20 @@ function drawXAxis(text, chart, scale, left, bottom, height, width){
 }
 
 // function meanLineV(mean, chart, scale, left, right, width, vertOffset)
-function meanYLine(mean, chart, scale, cts) {
+function meanYLine(mean, chart, scale, left, right, width, yoffset ) {
     // Draw the mean line
     console.log("Mean y: " + mean.toString());
     chart.append("line")
         .attr("class", "mean-line")
-        .attr("x1", cts.margin.left)
-        .attr("x2", cts.totalWidth - cts.margin.right)
-        .attr("y1", scale(mean - cts.yMeanOffset))// TODO fix this line height
-        .attr("y2", scale(mean - cts.yMeanOffset))
+        .attr("x1", left)
+        .attr("x2", width - right)
+        .attr("y1", scale(mean - yoffset))// TODO fix this line height
+        .attr("y2", scale(mean - yoffset))
         .attr("stroke", "red");
 
     chart.append("text")
-        .attr("x", cts.margin.left - 50) //TODO make left margin bigger
-        .attr("y", scale(mean - cts.yMeanOffset ))
+        .attr("x", left - 50) //TODO make left margin bigger
+        .attr("y", scale(mean - yoffset ))
         .text("avg");
 }
 
@@ -195,50 +203,41 @@ function drawDots(xaxis, yaxis, chart, scale, scaleB, data, color, left, top, wi
         .remove()
 }
 
-function domainMax(d, name){
-    return Math.max.apply(Math, d.map(function(o){return o.name})); //TODO this didn't work
-    // var maxRange = domainMax(data,"range"); called this way
-}
 
+function genColorLabels(data){
+    let colorLabels = [];
+    for (let i = 0; i < data.length; i++){
+        colorLabels.push(data[i].brand);
+    }
+    colorLabels = colorLabels.filter((v, i, a) => a.indexOf(v) === i);
+    return colorLabels;
+};
 
-function drawScatter(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
+function setupAxis(data, xax){
+    let max = Math.max.apply(Math, data.map(function(o){return o[xax]}));
+    if(typeof max != "number"){
+        max = data.length;
+    }
+    return max;
+};
+
+function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     let viewBox = document.getElementById(id).viewBox.baseVal;
     let totalWidth = viewBox.width;
     let totalHeight = viewBox.height;
-    let margins = {top: 20, right: 30, bottom: 60, left: 60};
     let innerWidth = totalWidth - margins.left - margins.right;
     let innerHeight = totalHeight - margins.top - margins.bottom;
-
-    //Setup color scale
-
-    console.log(data);
+    let xMeanOffset = 11;
+    let yMeanOffset = 0.3;
 
     var brandData = genBrandGroups(data);
+    var colorLabels = genColorLabels(data);
+    var filteredModelData; // For when we want to filter the data, keep original full data available
+    // filterData(); // TODO finish this function
+    console.log(colorLabels)
     console.log(data);
     console.log(brandData);
-    var colorLabels = [];
-    for (var i = 0; i < data.length; i++){
-        colorLabels.push(data[i].brand);
-    }
-    var unique = colorLabels.filter((v, i, a) => a.indexOf(v) === i);
-    console.log(unique)
 
-    var dotColour = d3.scaleOrdinal()
-        .domain(unique)
-        .range(d3.schemeTableau10)
-    // schemeDark2
-    // schemeSet1
-
-
-    var chartConst = {
-        totalWidth: totalWidth,
-        totalHeight: totalHeight,
-        innerWidth: innerWidth,
-        margin: margins,
-        color: dotColour,
-        xMeanOffset: 11,
-        yMeanOffset: 0.3
-    };
 
     //Constants for graphs
     var gasConst = {
@@ -247,32 +246,18 @@ function drawScatter(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         avgAcceleration: 8.0,
         avgPrice: 33464,
         avgPriceK: 33.464
-    }
-    var xAvg = gasConst[avg1];
-    console.log(xAvg);
-    var yAvg = gasConst[avg2];
-    console.log(yAvg);
-    //Initialize chart selection
+    };
 
+    // color scale for dots
+    var dotColour = d3.scaleOrdinal()
+        .domain(colorLabels)
+        .range(d3.schemeTableau10) // schemeSet1 // schemeDark2
+    console.log(dotColour)
+    // Setup scales for axis
+    // xax and yax are arguments to the function
+    var maxX = setupAxis(data, xax);
+    var maxY = setupAxis(data, yax);
 
-    let chart = d3.select("#" + id); // chart is an svg container id need # for id's
-
-
-    //Draw the background
-    drawBackground(chart, margins.left, margins.top, innerWidth, innerHeight)
-
-
-    var maxX = Math.max.apply(Math, data.map(function(o){return o[xax]}));
-    var maxY = Math.max.apply(Math, data.map(function(o){return o[yax]}));
-
-
-    //Make sure they are both numbers
-    if(typeof maxX != "number"){
-        maxX = data.length;
-    }
-    if(typeof maxY != "number"){
-        maxY = data.length;
-    }
     //Setup the x axis scale
     let xDomain = [0, maxX];
     let xRange = [0, innerWidth];
@@ -283,6 +268,21 @@ function drawScatter(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     let yRange = [innerHeight, 0];
     let yScale = d3.scaleLinear(yDomain, yRange).nice();
 
+    // Setup values for lines
+    var xAvg = gasConst[avg1];
+    var yAvg = gasConst[avg2];
+
+
+
+
+
+    //Initialize chart selection
+
+    let chart = d3.select("#" + id); // chart is an svg container id need # for id's
+
+
+    //Draw the background
+    drawBackground(chart, margins.left, margins.top, innerWidth, innerHeight)
 
     drawYAxis(ytitle, chart, yScale, margins.left, margins.top, innerWidth, totalHeight);
     drawXAxis(xtitle, chart, xScale, margins.left, innerHeight + margins.top,
@@ -290,18 +290,18 @@ function drawScatter(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     // Draw the mean line
     // meanLineV(gasConst.avgTrip, chart, yScale, margins.left, margins.right, totalWidth, accelOffset);
 
-    meanYLine(yAvg, chart, yScale, chartConst);
+    meanYLine(yAvg, chart, yScale, margins.left, margins.right, innerWidth, yMeanOffset);
 
 
 
     if(typeof xAvg !== 'undefined'){
         meanXLine(xAvg, chart, xScale, margins.left, margins.top,
-            margins.bottom, totalHeight, chartConst.xMeanOffset);
+            margins.bottom, totalHeight, xMeanOffset);
     }
 
 
 
-    // drawDots(xax, yax, chart, yScale, xScale, data, dotColour, margins.left, margins.top, innerWidth);
+    drawDots(xax, yax, chart, yScale, xScale, data, dotColour, margins.left, margins.top, innerWidth);
 
     let numItems = innerWidth / (data.length + 2);
     let radius = innerWidth / data.length / 2
