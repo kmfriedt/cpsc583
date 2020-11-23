@@ -99,8 +99,8 @@ function filterBrandArray(names, data) { // TODO figure out if you need this at 
 // This gets rid of columns that we don't want to use as axes
 function removeColumns(arr){
     // removes brand accel efficiency charge price price_range
-    var col1 = arr.slice(2,5),
-        col2 = arr.slice(7,9),
+    var col1 = arr.slice(3,7),
+        col2 = arr.slice(11,13),
         arr = col1.concat(col2);
 
     return arr;
@@ -160,6 +160,7 @@ function filterSpecificBrands(data,names){ // TODO figure out if I need to do th
             }
         }
     }
+    console.log(result);
     return result
 }
 function genCompareJson(d, names){
@@ -184,22 +185,19 @@ function radarChart(id, data) {
     // used for the example just show specific brands.
     var carNames = ["Tesla", "Audi", "Volkswagen", "Smart"]; //TODO get the brands from the interactions
 
+    // get brand data from the model data
+    brandData = genBrandData(data);
+    console.log(brandData);
+
+
     // get the rows of data for the brand names in carNames
-    var cars = filterSpecificBrands(data, carNames)
+    var cars = filterSpecificBrands(brandData, carNames)
+    console.log(cars)
+    // get all the column names from the data that we want
+    console.log(data.columns);
+    var features = removeColumns(data.columns);
 
-    // get all the column names from the data
-    var features = data.columns;
-
-
-    // If no axis Argument passed then default to removeColumns function
-    if(typeof axisList !== "undefined"){
-        features = axisList;
-    }
-    else{
-        features = removeColumns(features);
-        // console.log(features);
-    }
-
+    //TODO setup array of features that you want for low values and features for high values
     var carsJ = genAxisJson(cars,features);
     console.log(carsJ);
 
