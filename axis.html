@@ -21,17 +21,16 @@
         I plan to allow the users to change the price to one that they would be willing to pay for a vehicle.
         I also plan to allow them to change the range that they would want.
         I also need to generate a legend for the graph. </p>
-    <svg id="scatter2" width="800" height="600" viewBox="0 0 800 600">
+    <svg id="scatter2" width="1200" height="600" viewBox="0 0 1200 600">
         <rect class="bg"></rect>
     </svg>
     <script src="scatter.js"></script>
     <script>
         setupModel("scatter2", "price", "range", "Price (CDN$)", "Range (km)", "avgPrice", "avgTrip");
     </script>
-    <input value="Model / Brand" onclick="makeToggled(
-        'scatter2', 'price', 'range', 'Price (CDN$)', 'Range (km)', 'avgPrice', 'avgTrip')"
-           type="button"/>
-    <input id="inlin" type="text" onchange="linplot()">
+    <button id="switchDots", onclick="switchDots()">Switch to Brand View</button>
+    <input id="changePrice" type="text" onchange="changePrice()" value=33500>
+    <input id="changeRange" type="text" onchange="changeRange()" value=160>
 
 <!--    <h1>Brand Price and Range</h1>-->
 <!--    <svg id="scatter3" width="800" height="600" viewBox="0 0 800 600">-->
@@ -42,10 +41,10 @@
 <!--        setupBrand("scatter3", "price", "range", "Price (CDN$)", "Range (km)" , "avgPrice", "avgTrip");-->
 <!--    </script>-->
 
-<h1>Model Acceleration</h1>
-    <p>This was just a test to see how to use a category at the bottom.
-    I still have to figure out the axis at the bottom and the grid lines.
-    Also there are some issues with the data fitting in the white box.</p>
+<!--<h1>Model Acceleration</h1>-->
+<!--    <p>This was just a test to see how to use a category at the bottom.-->
+<!--    I still have to figure out the axis at the bottom and the grid lines.-->
+<!--    Also there are some issues with the data fitting in the white box.</p>-->
 <!--    <svg id="scatter4" width="800" height="600" viewBox="0 0 800 600">-->
 <!--        <rect class="bg"></rect>-->
 <!--    </svg>-->

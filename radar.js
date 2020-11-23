@@ -3,24 +3,23 @@
 // http://bl.ocks.org/nbremer/21746a9668ffdf6d8242
 // and updated to work with v6
 
+var _radarChart1;
+var _radarChart2;
+var _radarChart3;
 function setupRadar(id){
 
     //Changed this to import the brands only
-    d3.csv("brandAvg.csv").then(function (d){
-        makeRadar(id, d)
+    d3.csv("evdata2.csv").then(function (d){
+        _radarChart1 = new radarChart(id, d)
+        _radarChart1.draw();
     });
 
 }
 
-function genBrandArray(names, data) {
-    var cars = []
-    for (var i = 0; i < names.length; i++) {
-        cars.push(data.get(names[i]))
-    }
-    console.log(cars)
-    return cars
-}
 
+
+
+//TODO what does this function do *****************************************************
 function genAxisJson(cars, cols) {
 
     var result = [];
@@ -35,6 +34,7 @@ function genAxisJson(cars, cols) {
     return result
 }
 
+// These functions were used for the example in my submission
 function genModelRange(cars, cols) { //TODO make generic
 
     var result = [];
@@ -74,7 +74,6 @@ function genModelAccel2(cars, cols) { //TODO maybe use this for 3rd version
     }
     return result
 }
-
 function genModelAccel(cars, cols) {
 
     var result = [];
@@ -87,7 +86,17 @@ function genModelAccel(cars, cols) {
     return result
 }
 
-// This gets rid of columns that we don't want to use as axis
+// this filters the brand array to only include the brands you want
+function filterBrandArray(names, data) { // TODO figure out if you need this at all
+    var cars = []
+    for (var i = 0; i < names.length; i++) {
+        cars.push(data.get(names[i]))
+    }
+    console.log(cars)
+    return cars
+}
+
+// This gets rid of columns that we don't want to use as axes
 function removeColumns(arr){
     // removes brand accel efficiency charge price price_range
     var col1 = arr.slice(2,5),
@@ -97,8 +106,6 @@ function removeColumns(arr){
     return arr;
 
 }
-
-
 
 function colorBlobDots() {
     // The blobs are drawn one at a time. Get all the points to be that blobs color
@@ -116,12 +123,40 @@ function colorBlobDots() {
     //TODO 3 colours and 7 axis
 }
 
-function genBrandData(d,names){
+// generate brand data from model data
+function genBrandData(data){
+    var array = []
+
+
+    data = d3.groups(data, d => d.brand);
+
+    for(var i = 0; i < data.length; i++){
+
+        array.push( { "brand": data[i][0],
+            "accel": d3.mean(data[i][1], d => d.accel), // gives you the mean acceleration
+            "topspeed": d3.mean(data[i][1], d => d.topspeed),
+            "range": d3.mean(data[i][1], d => d.range),
+            "efficiency": d3.mean(data[i][1], d => d.efficiency),
+            "charge": d3.mean(data[i][1], d => d.charge),
+            "power": d3.mean(data[i][1], d => d.power),
+            "body": d3.mean(data[i][1], d => d.body),
+            "seats": d3.mean(data[i][1], d => d.seats),
+            "price" : d3.mean(data[i][1], d => d.price),
+            "pricek": d3.mean(data[i][1], d => d.pricek),
+            "price_km": d3.mean(data[i][1], d => d.price_km),
+            "price_range": d3.mean(data[i][1], d => d.price_range) })
+    }
+    return array
+}
+
+
+// shape the data to compare the brands.
+function filterSpecificBrands(data,names){ // TODO figure out if I need to do this for models
     var result = []
-    for (var i = 0; i < d.length; i++){
+    for (var i = 0; i < data.length; i++){
         for(var j = 0; j < names.length; j++){
-            if(names[j] === d[i].brand){
-                result.push(d[i])
+            if(names[j] === data[i].brand){
+                result.push(data[i])
             }
         }
     }
@@ -134,20 +169,27 @@ function genCompareJson(d, names){
 }
 
 
-function makeRadar(id, data, brandsList, axisList) {
+function radarChart(id, data) {
 
+// TODO set up the data like I did in the scatter.js file
 
 // Setup the data
-    var carNames = ["Tesla", "Audi", "Volkswagen", "Smart"]; //TODO get the brands from the interactions
-    console.log(data);
-    if(typeof brandsList !== "undefined"){
-        carNames = brandsList;
-    }
-    // get the rows of data for the brand names in carNames
-    var cars = genBrandData(data, carNames)
+    let viewBox = document.getElementById(id).viewBox.baseVal;
+    let totalWidth = viewBox.width;
+    let totalHeight = viewBox.height;
+    let margins = {top: 70, right: 40, bottom: 70, left: 40};
+    let innerWidth = totalWidth - margins.left - margins.right;
+    let innerHeight = totalHeight - margins.top - margins.bottom;
 
+    // used for the example just show specific brands.
+    var carNames = ["Tesla", "Audi", "Volkswagen", "Smart"]; //TODO get the brands from the interactions
+
+    // get the rows of data for the brand names in carNames
+    var cars = filterSpecificBrands(data, carNames)
+
+    // get all the column names from the data
     var features = data.columns;
-    // console.log(features);
+
 
     // If no axis Argument passed then default to removeColumns function
     if(typeof axisList !== "undefined"){
@@ -166,12 +208,7 @@ function makeRadar(id, data, brandsList, axisList) {
     var color = d3.scaleOrdinal(d3.schemeCategory10)
     // .range(["#EDC951","#CC333F","#00A0B0"])
 
-    let viewBox = document.getElementById(id).viewBox.baseVal;
-    let totalWidth = viewBox.width;
-    let totalHeight = viewBox.height;
-    let margins = {top: 70, right: 40, bottom: 70, left: 40};
-    let innerWidth = totalWidth - margins.left - margins.right;
-    let innerHeight = totalHeight - margins.top - margins.bottom;
+
     // set up image options to easily pass info to functions
     var imgOpts = {
         w: innerWidth,
