@@ -185,6 +185,8 @@ function radarChart(id, data) {
     // used for the example just show specific brands.
     var carNames = ["Tesla", "Audi", "Volkswagen", "Smart"]; //TODO get the brands from the interactions
 
+    // TODO setup any filtering of the data that needs to take place???? Here????
+
     // get brand data from the model data
     brandData = genBrandData(data);
     console.log(brandData);
