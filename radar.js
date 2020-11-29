@@ -99,7 +99,7 @@ function filterBrandArray(names, data) { // TODO figure out if you need this at 
 // This gets rid of columns that we don't want to use as axes
 function removeColumns(arr){
     // removes brand accel efficiency charge price price_range
-    var col1 = arr.slice(3,7),
+    var col1 = arr.slice(3,6),
         col2 = arr.slice(11,13),
         arr = col1.concat(col2);
 
@@ -160,7 +160,7 @@ function filterSpecificBrands(data,names){ // TODO figure out if I need to do th
             }
         }
     }
-    console.log(result);
+    // console.log(result);
     return result
 }
 function genCompareJson(d, names){
@@ -173,6 +173,14 @@ function genCompareJson(d, names){
 function radarChart(id, data) {
 
 // TODO set up the data like I did in the scatter.js file
+    var gasConst = {
+        avgTopSpeed: 190,
+        avgRange: 660,
+        avgTrip: 160,
+        avgAcceleration: 8.0,
+        avgPrice: 33464,
+        avgPriceK: 33.464
+    }
 
 // Setup the data
     let viewBox = document.getElementById(id).viewBox.baseVal;
@@ -184,8 +192,8 @@ function radarChart(id, data) {
 
     // used for the example just show specific brands.
     var carNames = ["Tesla", "Audi", "Volkswagen", "Smart"]; //TODO get the brands from the interactions
+    var carNames2 = ["Ford", "Nissan", "Kia", "Porsche"];
 
-    // TODO setup any filtering of the data that needs to take place???? Here????
 
     // get brand data from the model data
     brandData = genBrandData(data);
@@ -193,15 +201,29 @@ function radarChart(id, data) {
 
 
     // get the rows of data for the brand names in carNames
-    var cars = filterSpecificBrands(brandData, carNames)
-    console.log(cars)
-    // get all the column names from the data that we want
-    console.log(data.columns);
+    var cars = filterSpecificBrands(brandData, carNames);
+    var cars2 = filterSpecificBrands(brandData, carNames2);
+    var gasCar = [
+        {"topspeed": gasConst.avgTopSpeed,
+            "range": gasConst.avgRange,
+            "efficiency": 0,
+            "pricek": gasConst.avgPriceK,
+            "price_km": 51}];
+    // get all the column names from the data that we want  // TODO change this latter so we get 2 sets of data
+    // we will want to have data for a radar chart with low values and high values.
     var features = removeColumns(data.columns);
 
+
     //TODO setup array of features that you want for low values and features for high values
-    var carsJ = genAxisJson(cars,features);
-    console.log(carsJ);
+    var cars1Radar = genAxisJson(cars,features);
+    var cars2Radar = genAxisJson(cars2, features);
+    var gasCarRadar = genAxisJson(gasCar, features);
+    console.log(cars1Radar);
+    console.log(cars2Radar);
+    console.log(gasCarRadar);
+
+    // console.log(gasCar[0].range); // TODO build internal function to update the gasCar values
+    // cars1Radar.push(gasCarRadar[0]);  // TODO this is to add the garCarConstants to the radar chart
 
 
     //Setup the Chart Options
@@ -214,7 +236,7 @@ function radarChart(id, data) {
         w: innerWidth,
         h: innerHeight,
         margin: margins, //TODO may have to get rid of margins and put it's data here
-        maxValue: 550,
+        maxValue: 700,
         levels: 5,
         roundStrokes: true,
         color: color,
@@ -226,14 +248,6 @@ function radarChart(id, data) {
         strokeWidth: 2, 		//The width of the stroke around each blob
     };
 
-    var gasConst = {
-        avgTopSpeed: 190,
-        avgRange: 660,
-        avgTrip: 160,
-        avgAcceleration: 8.0,
-        avgPrice: 33464,
-        avgPriceK: 33.464
-    }
 
     // setup axis and radius
     var allAxis = features,
@@ -245,7 +259,7 @@ function radarChart(id, data) {
     console.log(allAxis)
 
     //Scale for the radius
-    // var max = d3.max(carsJ, function(i){return d3.max(i.map(function(o){return o.value;}))});
+    // var max = d3.max(cars1Radar, function(i){return d3.max(i.map(function(o){return o.value;}))});
     // console.log(max) //TODO fix this so max value isn't hard coded
 
 
@@ -254,7 +268,9 @@ function radarChart(id, data) {
         .domain([0, imgOpts.maxValue]);
     // .domain(d3.extent(cars))  // This did not work as wee need the axis value
 
-
+    var allCars = [];
+    allCars.push(cars1Radar);
+    allCars.push(cars2Radar);
 
     // Visualization rendering*************************************************************************************
 
@@ -262,14 +278,17 @@ function radarChart(id, data) {
     //Remove whatever chart with the same id/class was present before
     d3.select("#"+id).select("svg").remove(); //TODO This might have to be changed might not need "svg"
 
-    let chart = d3.select("#" + id); // chart is an svg container id need # for id's
 
-    chart.append("svg")
+
+    let charts = d3.select("#" + id); // chart is an svg container id need # for id's
+
+    charts.append("svg:svg")
         .attr("width",  imgOpts.w + imgOpts.margin.left + imgOpts.margin.right)
         .attr("height", imgOpts.h + imgOpts.margin.top + imgOpts.margin.bottom)
-        .attr("class", "radar"+id);
+        
+        // .attr("class", "radar"+id);
 
-    var g = chart.append("g")
+    var g = charts.append("g")
         .attr("transform", "translate(" + (imgOpts.w/2 + imgOpts.margin.left) + "," +
             (imgOpts.h/2 + imgOpts.margin.top) + ")");
 
@@ -358,7 +377,7 @@ function radarChart(id, data) {
 
     //Create a wrapper for the blobs
     var blobWrapper = g.selectAll(".radarWrapper")
-        .data(carsJ)
+        .data(cars1Radar)
         .enter().append("g")
         .attr("class", "radarWrapper");
 
@@ -420,7 +439,7 @@ function radarChart(id, data) {
     //Tool tips
     //Wrapper for the invisible circles on top
     var blobCircleWrapper = g.selectAll(".radarCircleWrapper")
-        .data(carsJ)
+        .data(cars1Radar)
         .enter().append("g")
         .attr("class", "radarCircleWrapper");
 
