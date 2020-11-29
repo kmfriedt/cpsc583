@@ -282,19 +282,34 @@ function radarChart(id, data) {
 
     let charts = d3.select("#" + id); // chart is an svg container id need # for id's
 
-    charts.append("svg:svg")
-        .attr("width",  imgOpts.w + imgOpts.margin.left + imgOpts.margin.right)
-        .attr("height", imgOpts.h + imgOpts.margin.top + imgOpts.margin.bottom)
-        
-        // .attr("class", "radar"+id);
 
-    var g = charts.append("g")
-        .attr("transform", "translate(" + (imgOpts.w/2 + imgOpts.margin.left) + "," +
-            (imgOpts.h/2 + imgOpts.margin.top) + ")");
+    charts.append("svg:svg")
+        .attr("width", innerWidth)
+        .attr("height", innerHeight)
+        .selectAll("g")
+        .data(allCars)
+        .enter()
+        .append("svg:g")
+    // charts.append("svg")
+    //     .attr("width",  innerWidth)
+    //     .attr("height", innerHeight)
+    //     .attr("class", "radar"+id);
+
+    // var g = charts.append("g")
+        var g = charts.selectAll("g")
+        .attr("transform",(d,i) => {
+            console.log(i);
+        return "translate(" + (imgOpts.w/2 + imgOpts.margin.left) + "," +
+            (imgOpts.h/4 + imgOpts.h/2*i + imgOpts.margin.top) + ")"})
+            .each(function(d) {
+                console.log(d);
+            });
 
     // Glow filter //TODO read about this glow filter
 
-    var filter = g.append('defs').append('filter').attr('id','glow'),
+    // g.append('defs').append('filter').attr('id','glow'),
+
+    var filter = d3.selectAll(g).append('defs').append('filter').attr('id','glow'),
         feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation','2.5').attr('result','coloredBlur'),
         feMerge = filter.append('feMerge'),
         feMergeNode_1 = feMerge.append('feMergeNode').attr('in','coloredBlur'),
@@ -303,7 +318,12 @@ function radarChart(id, data) {
 
     //Grid rendering*************************************************************************************
     //Wrapper for the grid & axes
-    var axisGrid = g.append("g").attr("class", "axisWrapper");
+    var axisGrid = d3.selectAll(g).attr("class", "axisWrapper")
+        .each(function(d) {
+            console.log(d);
+        })
+        .attr();
+        // g.append("g").attr("class", "axisWrapper");
 
     //Draw the background circles
     axisGrid.selectAll(".levels")
@@ -311,7 +331,8 @@ function radarChart(id, data) {
         .enter()
         .append("circle")
         .attr("class", "gridCircle")
-        .attr("r", (d) => {return radius/imgOpts.levels*d;})
+        .attr("r", (d) => {
+            return radius/imgOpts.levels*d;})
         .style("fill", "#CDCDCD")
         .style("stroke", "#CDCDCD")
         .style("fill-opacity", imgOpts.opacityCircles)
