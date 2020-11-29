@@ -37,7 +37,7 @@ function drawBackground(chart, left, top, width, height){
         .attr("height", height)
         .style("fill", "white");
 }
-// attempts at data manipulation
+// attempts at data manipulation CURRENTLY NOT USED
 function dataMainpulation(data){
 
     // each row is a JSON object, each feature is stored in a key for that object
@@ -129,7 +129,9 @@ function drawXAxis(text, chart, scale, left, bottom, height, width){
 
 }
 
-// function meanLineV(mean, chart, scale, left, right, width, vertOffset)
+/**
+ * Only used for the first mean line, not used for the transition
+ */
 function meanYLine(mean, chart, scale, left, right, width, yoffset, bottom ) {
     // Draw the mean line
     console.log("Mean y: " + mean.toString());
@@ -138,8 +140,8 @@ function meanYLine(mean, chart, scale, left, right, width, yoffset, bottom ) {
         .attr("class", "yMean")
         .attr("x1", left)
         .attr("x2", width - right )
-        .attr("y1", scale(mean-yoffset) )// TODO fix this line height
-        .attr("y2", scale(mean-yoffset) )
+        .attr("y1", scale(mean - yoffset)  )// TODO fix this line height
+        .attr("y2", scale(mean - yoffset)  )
         .attr("stroke", "red");
 
     chart.append("text")
@@ -148,7 +150,9 @@ function meanYLine(mean, chart, scale, left, right, width, yoffset, bottom ) {
         .attr("y", scale(mean - yoffset ))
         .text("avg");
 }
-
+/**
+ * Used for the first mean line not used to transition mean line
+ */
 function meanXLine(mean, chart, scale, left, top, bottom, height, hOffset){
     if(typeof mean !== 'undefined') {
         console.log("Mean x: " + mean.toString());
@@ -241,7 +245,8 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     let innerHeight = totalHeight - margins.top - margins.bottom;
     let xMeanOffset = 11;
     let yMeanOffset = 40;
-    let yMeanOffset2 = 20;
+    let yMeanOffset2 = 26;
+    let curYOffset = 40;
     let yMeanMultiple = 0.80;
 
     var brandData = genBrandGroups(data);
@@ -345,6 +350,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         chart.append("g")
             .attr("transform", `translate(${margins.left},${margins.top})`) // back ticks not quotes
             .attr("class", "grid")
+
             .call(d3.axisLeft(yScale)
                 .tickFormat("")
                 .tickSize(-innerWidth)
@@ -370,6 +376,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         // use brandData
         //SETUP SCALES AGAIN
         // get maxX and maxY
+        curYOffset = yMeanOffset2
         maxX = setupAxis(brandData, xax);
         maxY = setupAxis(brandData, yax);
         console.log("max x: " + maxX.toString());
@@ -400,11 +407,11 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         chart.select(".yMean")
             .transition()
             .duration(750)
-            .attr("y1", yScale(yAvg - yMeanOffset2))
-            .attr("y2", yScale(yAvg - yMeanOffset2))
+            .attr("y1", yScale(yAvg - curYOffset))
+            .attr("y2", yScale(yAvg - curYOffset))
 
         chart.select(".yMeanText")
-            .attr("y", yScale(yAvg - yMeanOffset))
+            .attr("y", yScale(yAvg - curYOffset))
 
 
         chart.select(".xMean")
@@ -450,6 +457,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     this.modelView = function () {
         //SETUP SCALES AGAIN
         // get maxX and maxY
+        curYOffset = yMeanOffset
         console.log(data)
         maxX = setupAxis(data, xax);
         maxY = setupAxis(data, yax);
@@ -479,11 +487,11 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         chart.select(".yMean")
             .transition()
             .duration(750)
-            .attr("y1", yScale(yAvg - yMeanOffset))
-            .attr("y2", yScale(yAvg - yMeanOffset))
+            .attr("y1", yScale(yAvg - curYOffset))
+            .attr("y2", yScale(yAvg - curYOffset))
 
         chart.select(".yMeanText")
-            .attr("y", yScale(yAvg - yMeanOffset))
+            .attr("y", yScale(yAvg - curYOffset))
 
 
         chart.select(".xMean")
@@ -530,11 +538,11 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         chart.select(".yMean")
             .transition()
             .duration(750)
-            .attr("y1", yScale(yAvg - yMeanOffset))
-            .attr("y2", yScale(yAvg - yMeanOffset))
+            .attr("y1", yScale(yAvg - curYOffset))
+            .attr("y2", yScale(yAvg - curYOffset))
 
         chart.select(".yMeanText")
-            .attr("y", yScale(yAvg - yMeanOffset))
+            .attr("y", yScale(yAvg - curYOffset))
 
     };
 
