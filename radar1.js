@@ -4,26 +4,27 @@
 // and updated to work with v6
 
 var _radarChart1;
-
+var _radarChart2;
+var _radarChartVS;
 function setupRadar1(id){
 
-    let axis = ["range", "efficiency", "pricek", "price_km"]
+    let axis = ["range", "efficiency", "topspeed", "pricek", "price_km"]
     //Changed this to import the brands only
     d3.csv("evdata2.csv").then(function (d){
-        _radarChart1 = new radarChart(id, d, axis)
+        _radarChart1 = new radarChart(id, d, axis, 550)
         _radarChart1.draw();
     });
 
 
 
 };
-
+// TODO for some reason time_charge isn't working don't know why...
 function setupRadar2(id){
-    let axis = ["accel", "topspeed", "seats", "pricek"]
+    let axis = ["accel", "seats", "time_charge"]
     //Changed this to import the brands only
     d3.csv("evdata2.csv").then(function (d){
-        _radarChart1 = new radarChart(id, d, axis)
-        _radarChart1.draw();
+        _radarChart2 = new radarChart(id, d, axis, 10)
+        _radarChart2.draw();
     });
 
 };
@@ -32,8 +33,8 @@ function setupRadarVS(id){
     let axis = [];
     //Changed this to import the brands only
     d3.csv("evdata2.csv").then(function (d){
-        _radarChart1 = new radarChart(id, d, axis)
-        _radarChart1.draw();
+        _radarChartVS = new radarChart(id, d, axis, 200 )
+        _radarChartVS.draw();
     });
 
 };
@@ -195,7 +196,7 @@ function genCompareJson(d, names){
 }
 
 
-function radarChart(id, data, axis) {
+function radarChart(id, data, axis, tempMaxValue) {
 
 // TODO set up the data like I did in the scatter.js file
 
@@ -227,6 +228,9 @@ function radarChart(id, data, axis) {
         strokeWidth: 2, 		//The width of the stroke around each blob
     };
 
+    //TODO get rid of this when you fix filtering
+    imgOpts.maxValue = tempMaxValue;
+
     var gasConst = {
         avgTopSpeed: 190,
         avgRange: 660,
@@ -234,10 +238,12 @@ function radarChart(id, data, axis) {
         avgAcceleration: 8.0,
         avgPrice: 33464,
         avgPriceK: 33.464
-    }
+    };
+
     var gasCar = [
-        {"topspeed": gasConst.avgTopSpeed,
-            "range": gasConst.avgRange,
+        {   "accel": gasConst.avgAcceleration,
+            "topspeed": gasConst.avgTopSpeed,
+            "range": gasConst.avgTrip,
             "efficiency": 0,
             "pricek": gasConst.avgPriceK,
             "price_km": 51}];
@@ -254,11 +260,18 @@ function radarChart(id, data, axis) {
 
     // get the rows of data for the brand names in carNames
     var cars = filterSpecificBrands(brandData, carNames)
-    var features = removeColumns(data.columns);
 
-    //TODO setup array of features that you want for low values and features for high values
-    var carsRadar = genAxisJson(cars,features);
-    var gasCarsRadar = genAxisJson(gasCar, features);
+    let carsRadar =[];
+    let gasCarsRadar =[];
+    if(axis.length === 0){
+        axis = ["accel", "topspeed", "range", "efficiency", "pricek", "price_km"];
+        carsRadar = genAxisJson(gasCar, axis);
+    }
+    else{
+        carsRadar = genAxisJson(cars,axis);
+    }
+
+
     console.log(gasCarsRadar);
 
     // TODO use this to put the gasCarsRadar into the cars
@@ -266,7 +279,7 @@ function radarChart(id, data, axis) {
     //carsRadar.push(gasCarsRadar[0]);
 
     // setup axis and radius
-    var allAxis = features,
+    var allAxis = axis,
         totalAxes = allAxis.length,
         radius = Math.min(imgOpts.w/2, imgOpts.h/2), 	//Radius of the outermost circle
         Format = d3.format('.2f'),			 	//Percentage formatting
