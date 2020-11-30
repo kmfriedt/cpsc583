@@ -11,7 +11,8 @@
 </head>
 <body>
 
-
+    <script src="radar1.js"></script>
+    <script src="scatter.js"></script>
 
     <h1>Price and Range</h1>
     <p>The scatter chart is not my primary visualization.
@@ -24,7 +25,8 @@
     <svg id="scatter2" width="1200" height="600" viewBox="0 0 1200 600">
         <rect class="bg"></rect>
     </svg>
-    <script src="scatter.js"></script>
+
+
     <script>
         setupModel("scatter2", "price", "range", "Price (CDN$)", "Range (km)", "avgPrice", "avgTrip");
     </script>
@@ -85,7 +87,6 @@
 <!--    <svg id="radar6" width="500" height="375" viewBox="0 0 500 375">-->
 <!--        <rect class="bg"></rect>-->
 <!--    </svg>-->
-    <script src="radar1.js"></script>
 
     <script>
         setupRadar1("radar1");

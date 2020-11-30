@@ -1,11 +1,15 @@
 
 // set up global reference or scatterplot
 // d3 = require("d3")
+//
+
+var clickedCars = [];
+// export clickedCars;
 var _scatChart;
 
 var _brandChart;
 
-const margins = {top: 20, right: 400, bottom: 60, left: 80};
+const margins = {top: 20, right: 200, bottom: 60, left: 80};
 
 function setupModel(id, xax, yax, xtitle, ytitle, avg1, avg2){
     //Changed this to import the brands only
@@ -76,58 +80,6 @@ function genBrandGroups(data){
     return array
 }
 
-function drawYAxis(text, chart, scale, left, top, width, height){
-
-
-
-    chart.append("g")
-        .attr("transform", `translate(${left},${top})`) // back ticks not quotes
-        .transition().duration(2000)
-        .call(d3.axisLeft(scale));
-
-    chart.append("g")
-        .attr("transform", `translate(${left},${top})`) // back ticks not quotes
-        .attr("class", "grid")
-        .call(d3.axisLeft(scale)
-            .tickFormat("")
-            .tickSize(-width)
-
-        );
-
-    chart.append("text")
-        .attr("text-anchor", "end")
-        .attr("x", -height/2 + top*2)
-        .attr("y", left - 40 )
-        .attr("transform", "rotate(-90)")
-        .text(text);
-
-
-
-}
-
-function drawXAxis(text, chart, scale, left, bottom, height, width){
-
-
-    chart.append("g")
-        .attr("transform", `translate(${left},${bottom})`) // back ticks not quotes
-        .call(d3.axisBottom(scale));
-
-    chart.append("g")
-        .attr("transform", `translate(${left},${bottom})`) // back ticks not quotes
-        .attr("class", "grid")
-        .call(d3.axisBottom(scale)
-            .tickFormat("")
-            .tickSize(-height)
-
-        );
-
-    chart.append("text")
-        .attr("text-anchor", "end")
-        .attr("x", width / 2 + left)
-        .attr("y", bottom + 45 )
-        .text(text);
-
-}
 
 /**
  * Only used for the first mean line, not used for the transition
@@ -140,14 +92,14 @@ function meanYLine(mean, chart, scale, left, right, width, yoffset, bottom ) {
         .attr("class", "yMean")
         .attr("x1", left)
         .attr("x2", width - right )
-        .attr("y1", scale(mean - yoffset)  )// TODO fix this line height
-        .attr("y2", scale(mean - yoffset)  )
+        .attr("y1", scale(mean - 40 )  )// TODO fix this line height
+        .attr("y2", scale(mean - 40 )  )
         .attr("stroke", "red");
 
     chart.append("text")
         .attr("class", "yMeanText")
         .attr("x", left - 50) //TODO make left margin bigger
-        .attr("y", scale(mean - yoffset ))
+        .attr("y", scale(mean-40))
         .text("avg");
 }
 /**
@@ -173,45 +125,22 @@ function meanXLine(mean, chart, scale, left, top, bottom, height, hOffset){
 
 }
 
-function drawDots(xaxis, yaxis, chart, scale, scaleB, data, color, left, top, width){
-    let numItems = width / (data.length + 2);
-    let radius = width / data.length / 2
-    console.log("Radius: " + radius.toString())
-    let dotPadding = 10
+function searchClickedArrayM(nameKey, myArray){
+    for (var i=0; i < myArray.length; i++) {
+        if (myArray[i].carname === nameKey) {
+            return i;
+        }
+    }
+};
 
-    let dots = chart
-        .append("g")
-        .attr("class", "scatterPlot")
-        .attr("transform", `translate(${left},${top})`)
-        .selectAll('circle')
-        .data(data);
+function searchClickedArrayB(nameKey, myArray){
+    for (var i=0; i < myArray.length; i++) {
+        if (myArray[i].brand === nameKey) {
+            return i;
+        }
+    }
+};
 
-
-    dots.enter().append("circle")
-        .attr("cx", (d,i) => {
-            console.log(typeof scaleB(d[xaxis]))//TODO need to fix this
-            if(typeof scaleB(d[xaxis]) === "number"){
-                return scaleB(d[xaxis]) - radius;
-            }
-            return numItems * i + 10;
-        })
-        .attr("cy", (d,i) => {
-            // console.log(scale(d[yaxis]))
-            // console.log(typeof scale(d[yaxis]))
-            if(typeof scale(d[yaxis]) === "number"){
-                return scale(d[yaxis]) - radius;
-            }
-            return numItems * i + 20;
-        })
-        .attr("r", radius)
-        .style("fill", (d) => {return color(d.brand)});
-
-    dots.exit().transition().duration(750)
-        .attr("x", 0)
-        .attr("y", 300)
-        .attr("r", 0)
-        .remove()
-}
 
 
 function genColorLabels(data){
@@ -244,13 +173,15 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     let innerWidth = totalWidth - margins.left - margins.right;
     let innerHeight = totalHeight - margins.top - margins.bottom;
     let xMeanOffset = 11;
-    let yMeanOffset = 40;
+    let yMeanOffset = 32;
     let yMeanOffset2 = 26;
-    let curYOffset = 40;
-    let yMeanMultiple = 0.80;
+    let curYOffset = yMeanOffset; // used when switching between views
+    let curView = "car";
+
 
     var brandData = genBrandGroups(data);
     var colorLabels = genColorLabels(data);
+
     var filteredModelData; // For when we want to filter the data, keep original full data available
     // filterData(); // TODO finish this function
     console.log(colorLabels)
@@ -268,10 +199,26 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     };
 
     // color scale for dots
-    var dotColour = d3.scaleOrdinal()
-        .domain(colorLabels)
-        .range(d3.schemeTableau10) // schemeSet1 // schemeDark2
+    // var dotColour = d3.scaleOrdinal() // TODO original color scale
+    //     .domain(colorLabels)
+    //     .range(d3.schemeTableau10) // schemeSet1 // schemeDark2
+    // console.log(dotColour)
+
+
+    var dotColour = d3.scaleLinear()
+        .domain([25,15])
+        .range(d3.schemeBuGn[3]) // schemeSet1 // schemeDark2
     console.log(dotColour)
+
+    var legendScale = d3.scaleLinear()
+        .domain(14,2)
+        .range([1, 75])
+
+    let legendHeight = 130
+
+
+
+
     // Setup scales for axis
     // xax and yax are arguments to the function
     var maxX = setupAxis(data, xax);
@@ -282,7 +229,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     //Setup the x axis scale
     let xDomain = [0, maxX];
     let xRange = [0, innerWidth];
-    xScale = d3.scaleLinear()
+    let xScale = d3.scaleLinear()
         .domain(xDomain)
         .range(xRange)
         .nice();
@@ -290,7 +237,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     //Setup the y axis scale
     let yDomain = [0, maxY];
     let yRange = [innerHeight, 0];
-    yScale = d3.scaleLinear()
+    let yScale = d3.scaleLinear()
         .domain(yDomain)
         .range(yRange)
         .nice();
@@ -300,6 +247,43 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     var yAvg = gasConst[avg2];
 
 
+    //
+    // // Brushing set up
+    // let brush = d3.brush().on("end", this.brushended),
+    //     idleTimeout,
+    //     idleDelay = 1000;
+    //
+    //
+    // this.idled = function() {
+    //     idleTimeout = null;
+    // }
+    //
+    // this.zoom = function() {
+    //     var t = chart.transition().duration(750);
+    //     chart.select(".xAxis").transition(t).call(xAxis);
+    //     chart.select(".yAxis").transition(t).call(yAxis);
+    //     chart.selectAll("circle").transition(t)
+    //         .attr("cx", function(d) {
+    //             console.log(d)
+    //             return xScale(d[0]); })
+    //         .attr("cy", function(d) {
+    //             console.log(d)
+    //             return yScale(d[1]); });
+    // }
+    //
+    // this.brushended = function(event) {
+    //     var s = event.selection;
+    //     if(s === null){
+    //         if (!idleTimeout) return idleTimeout = setTimeout(this.idled, idleDelay);
+    //         xScale.domain(xDomain);
+    //         yScale.domain(yDomain);
+    //     } else {
+    //         xScale.domain([s[0][0], s[1][0]].map(xScale.invert, xScale));
+    //         yScale.domain([s[1][1], s[0][1]].map(yScale.invert, yScale));
+    //         chart.select(".brush").call(brush.move, null);
+    //     }
+    //     this.zoom();
+    // }
 
 
 
@@ -324,7 +308,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
 
         chart.append("g")
             .attr("transform", `translate(${margins.left},${innerHeight + margins.top})`) // back ticks not quotes
-            .attr("class", "grid")
+            .attr("class", "xgrid")
             .call(d3.axisBottom(xScale)
                 .tickFormat("")
                 .tickSize(-innerHeight)
@@ -349,7 +333,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
 
         chart.append("g")
             .attr("transform", `translate(${margins.left},${margins.top})`) // back ticks not quotes
-            .attr("class", "grid")
+            .attr("class", "ygrid")
 
             .call(d3.axisLeft(yScale)
                 .tickFormat("")
@@ -364,11 +348,114 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
             .attr("transform", "rotate(-90)")
             .text(ytitle);
 
+
+
         // Draw the mean lines
         meanYLine(yAvg, chart, yScale, margins.left, margins.right, totalWidth, yMeanOffset, margins.bottom);
         meanXLine(xAvg, chart, xScale, margins.left, margins.top, margins.bottom, totalHeight, xMeanOffset);
 
-        drawDots(xax, yax, chart, yScale, xScale, data, dotColour, margins.left, margins.top, innerWidth);
+        let numItems = innerWidth / (data.length + 2);
+        let radius = innerWidth / data.length / 2;
+        console.log("Radius: " + radius.toString())
+        let dotPadding = 40
+
+        let dots = chart
+            .append("g")
+            .attr("class", "scatterPlot")
+            .attr("transform", `translate(${margins.left},${margins.top})`)
+            .selectAll('circle')
+            .data(data);
+
+
+        dots.enter().append("circle")
+            .attr("cx", (d,i) => {
+                console.log(typeof xScale(d[xax]))//TODO need to fix this
+                if(typeof xScale(d[xax]) === "number"){
+                    return xScale(d[xax]) - radius;
+                }
+                return numItems * i + 10;
+            })
+            .attr("cy", (d,i) => {
+                // console.log(scale(d[yaxis]))
+                // console.log(typeof scale(d[yaxis]))
+                if(typeof yScale(d[yax]) === "number"){
+                    return yScale(d[yax]) - radius;
+                }
+                return numItems * i + 20;
+            })
+            .attr("r", radius)
+            .style("fill", (d) => {return dotColour(d.accel)})
+            .attr("stroke", (d) => {return dotColour(d.accel)})
+            .on("mouseover", function(event,d) {
+                let newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
+                let newY =  parseFloat(d3.select(this).attr('cy')) + 13;
+                console.log(d.car)
+                // console.log(d.value)
+                tooltip
+                    .attr('x', newX)
+                    .attr('y', newY)
+                    .text((d[curView]))
+                    .transition().duration(200)
+                    .style('opacity', 1);
+            })
+            .on("mouseout", function(){
+                tooltip.transition().duration(500)
+                    .style("opacity", 0);
+            })
+            .on("mousedown", function(event, d) {
+                let currentStroke = d3.select(this).attr("stroke");
+
+                if(currentStroke !== "black"){
+                    this.setAttribute("stroke", "black");
+                    // add this to the list
+                    clickedCars.push(d);
+                }
+                else{
+                    this.setAttribute("stroke", (d) => {return dotColour(d.accel)})
+                    // remove this from the list
+                    let ind = searchClickedArrayM(d.carname, clickedCars);
+                    clickedCars.splice(ind, 1);
+                }
+                console.log(clickedCars);
+                _radarChart1.getArray(clickedCars);
+            });
+
+        var tooltip = chart.append("text")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+
+        dots.exit().transition().duration(750)
+            .attr("x", 0)
+            .attr("y", 300)
+            .attr("r", 0)
+            .remove()
+
+
+
+
+        var legendAxis = d3.axisRight()
+            .scale(legendScale)
+            .tickSize(6)
+            .ticks(13);
+        // chart.append("svg")
+        //     .attr("height", legendHeight + margins.top)
+        //     .attr("width", 25)
+        //     .style("right", "0px")
+        //     .style("top", "0px")
+
+        chart.append("g")
+            .attr("class", "legendAxis")
+            .attr("transform", "translate(" + (innerWidth + margins.left*2) + "," + (margins.top) + ")")
+            .call(legendAxis);
+
+        // // Brushing
+        //
+        // chart.append("g")
+        //     .attr("class", "brush")
+        //     .call(brush);
+
+
 
     };
 
@@ -376,7 +463,9 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         // use brandData
         //SETUP SCALES AGAIN
         // get maxX and maxY
-        curYOffset = yMeanOffset2
+        curYOffset = yMeanOffset2;
+        curView = "brand";
+        clickedCars = [];
         maxX = setupAxis(brandData, xax);
         maxY = setupAxis(brandData, yax);
         console.log("max x: " + maxX.toString());
@@ -425,7 +514,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
 
 
         // // drawDots(xax, yax, chart, yScale, xScale, brandData, dotColour, margins.left, margins.top, innerWidth);
-        dots = chart.select(".scatterPlot")
+        let dots = chart.select(".scatterPlot")
             .selectAll('circle')
             .data(brandData);
 
@@ -438,6 +527,45 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
 
         let radius = innerWidth /  brandData.length / 2
 
+        dots.attr("stroke", (d) => {return dotColour(d.accel)})
+            .on("mouseover", function(event,d) {
+                newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
+                newY =  parseFloat(d3.select(this).attr('cy')) + 13;
+                // console.log(d.car) // This is not a value anymore
+                // console.log(d.value)
+                tooltip
+                    .attr('x', newX)
+                    .attr('y', newY)
+                    .text((d[curView]))
+                    .transition().duration(200)
+                    .style('opacity', 1);
+            })
+            .on("mouseout", function(){
+                tooltip.transition().duration(500)
+                    .style("opacity", 0);
+            })
+            .on("mousedown", function(event, d) {
+                let currentStroke = d3.select(this).attr("stroke");
+
+                if(currentStroke !== "black"){
+                    this.setAttribute("stroke", "black");
+                    // add this to the list
+                    clickedCars.push(d);
+                }
+                else{
+                    this.setAttribute("stroke", (d) => {return dotColour(d.accel)})
+                    // remove this from the list
+                    let ind = searchClickedArrayB(d.brand, clickedCars);
+                    clickedCars.splice(ind, 1);
+                }
+                console.log(clickedCars);
+                _radarChart1.getArray(clickedCars);
+            })
+
+        var tooltip = chart.append("text")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
         dots.transition()
             .duration(750)
             .attr("r", radius)
@@ -448,8 +576,19 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                 return yScale(d[yax]) - radius;
             })
             .style("fill", (d) => {
-                return dotColour(d.brand);
+                return dotColour(d.accel);
             })
+            .attr("stroke", (d) => {return dotColour(d.accel)})
+
+        d3.selectAll(".ygrid").transition().duration(750)
+            .call(d3.axisLeft(yScale)
+            .tickFormat("")
+            .tickSize(-innerWidth));
+
+        d3.selectAll(".xgrid").transition().duration(750)
+            .call(d3.axisBottom(xScale)
+            .tickFormat("")
+            .tickSize(-innerHeight));
 
 
     };
@@ -457,7 +596,9 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     this.modelView = function () {
         //SETUP SCALES AGAIN
         // get maxX and maxY
-        curYOffset = yMeanOffset
+        curYOffset = yMeanOffset;
+        curView = "carname";
+        clickedCars = [];
         console.log(data)
         maxX = setupAxis(data, xax);
         maxY = setupAxis(data, yax);
@@ -505,7 +646,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
 
 
         // // drawDots(xax, yax, chart, yScale, xScale, brandData, dotColour, margins.left, margins.top, innerWidth);
-        dots = chart.select(".scatterPlot")
+        let dots = chart.select(".scatterPlot")
             .selectAll('circle')
             .data(data);
 
@@ -515,8 +656,42 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         // .duration(750)
 
         let radius = innerWidth /  data.length / 2
-        dots.enter()
+        dots.attr("stroke", (d) => {return dotColour(d.accel)})
+            .enter()
             .append('circle')
+            .on("mouseover", function(event,d) {
+                newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
+                newY =  parseFloat(d3.select(this).attr('cy')) + 13;
+                console.log(d.car)
+                // console.log(d.value)
+                tooltip
+                    .attr('x', newX)
+                    .attr('y', newY)
+                    .text((d[curView]))
+                    .transition().duration(200)
+                    .style('opacity', 1);
+            })
+            .on("mouseout", function(){
+                tooltip.transition().duration(500)
+                    .style("opacity", 0);
+            })
+            .on("mousedown", function(event, d) {
+                let currentStroke = d3.select(this).attr("stroke");
+
+                if(currentStroke !== "black"){
+                    this.setAttribute("stroke", "black");
+                    // add this to the list
+                    clickedCars.push(d);
+                }
+                else{
+                    this.setAttribute("stroke", (d) => {return dotColour(d.accel)})
+                    // remove this from the list
+                    let ind = searchClickedArrayB(d.brand, clickedCars);
+                    clickedCars.splice(ind, 1);
+                }
+                console.log(clickedCars);
+                _radarChart1.getArray(clickedCars);
+            })
             .merge(dots)
             .transition()
             .duration(750)
@@ -528,8 +703,23 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                 return yScale(d[yax]) - radius;
             })
             .style("fill", (d) => {
-                return dotColour(d.brand);
-            })
+                return dotColour(d.accel);
+            });
+
+
+        var tooltip = chart.append("text")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        d3.selectAll(".ygrid").transition().duration(750)
+            .call(d3.axisLeft(yScale)
+                .tickFormat("")
+                .tickSize(-innerWidth));
+
+        d3.selectAll(".xgrid").transition().duration(750)
+            .call(d3.axisBottom(xScale)
+                .tickFormat("")
+                .tickSize(-innerHeight));
 
     };
 

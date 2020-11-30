@@ -7,11 +7,11 @@ var _radarChart1;
 var _radarChart2;
 var _radarChartVS;
 function setupRadar1(id){
-
+    let carNames = ["Tesla", "Audi", "Volkswagen", "Smart"];
     let axis = ["range", "efficiency", "topspeed", "pricek", "price_km"]
     //Changed this to import the brands only
     d3.csv("evdata2.csv").then(function (d){
-        _radarChart1 = new radarChart(id, d, axis, 550)
+        _radarChart1 = new radarChart(id, d, axis, 550, "Electric Car Comparison", carNames);
         _radarChart1.draw();
     });
 
@@ -20,10 +20,11 @@ function setupRadar1(id){
 };
 // TODO for some reason time_charge isn't working don't know why...
 function setupRadar2(id){
+
     let axis = ["accel", "seats", "time_charge"]
     //Changed this to import the brands only
     d3.csv("evdata2.csv").then(function (d){
-        _radarChart2 = new radarChart(id, d, axis, 10)
+        _radarChart2 = new radarChart(id, d, axis, 10, "Selected Electric Car Compared to Gasoline Car");
         _radarChart2.draw();
     });
 
@@ -31,9 +32,11 @@ function setupRadar2(id){
 
 function setupRadarVS(id){
     let axis = [];
+    let carNames = ["Avg Gas Car"];
     //Changed this to import the brands only
     d3.csv("evdata2.csv").then(function (d){
-        _radarChartVS = new radarChart(id, d, axis, 200 )
+        _radarChartVS = new radarChart(id, d, axis, 200,
+            "Selected Electric Car Compared to Gasoline Car", carNames )
         _radarChartVS.draw();
     });
 
@@ -196,7 +199,7 @@ function genCompareJson(d, names){
 }
 
 
-function radarChart(id, data, axis, tempMaxValue) {
+function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
 
 // TODO set up the data like I did in the scatter.js file
 
@@ -249,7 +252,7 @@ function radarChart(id, data, axis, tempMaxValue) {
             "price_km": 51}];
 
     // used for the example just show specific brands.
-    var carNames = ["Tesla", "Audi", "Volkswagen", "Smart"]; //TODO get the brands from the interactions
+    // var carNames = ["Tesla", "Audi", "Volkswagen", "Smart"]; //TODO get the brands from the interactions
 
     // TODO setup any filtering of the data that needs to take place???? Here????
 
@@ -488,7 +491,7 @@ function radarChart(id, data, axis, tempMaxValue) {
             .attr("cy", function (d,i) { return rScale(d.value) * Math.sin(angleSlice*i - Math.PI/2); })
             .style("fill", "none")
             .style("pointer-events", "all")
-            .on("mouseover", function (event, d) {  //TODO had to add event to get this to work
+            .on("mouseover", function (event, d) {
                 newX =  parseFloat(d3.select(this).attr('cx')) - 10;
                 newY =  parseFloat(d3.select(this).attr('cy')) - 10;
                 // console.log(d)
@@ -510,9 +513,64 @@ function radarChart(id, data, axis, tempMaxValue) {
             .attr("class", "tooltip")
             .style("opacity", 0);
 
+
+        // Title
+       chart.append("text")
+           .attr("x", function() {
+               console.log(chartTitle.length)
+              return innerWidth/2+85 + chartTitle.length;
+           })
+           .attr("y", 10)
+           .attr("dy", ".45em")
+           .style("text-anchor","end")
+           .text(chartTitle);
+
+        // Legend use chartTitle as the text
+        var legend = chart.append("g")
+            .attr("class", "legend-group").selectAll(".legend")
+            .data(color.domain())
+            .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform" , function (d,i) {
+                return "translate(-100," + (i+1) * 20 + ")";
+            });
+
+        // draw legend colored rectangles
+
+        legend.append("rect")
+            .attr("x", innerWidth + 70)
+            .attr("width", 18)
+            .attr("height", 9)
+            .style("fill", (d,i)=> color(d));
+
+        // draw legend text
+        legend.append("text")
+            .attr("x", innerWidth+160)
+            .attr("y", 5)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function(d, i) {
+                console.log(d);
+                console.log(carNames[i])
+                return "- "+carNames[i];
+            });
+        // put title on the legend
+        chart.select("g.legend-group")
+            .append("g")
+            .attr("class", "legend")
+            .attr("transform", "translate(-100,0)")
+            .append("text")
+            .attr("x", innerWidth+120)
+            .attr("y", 0)
+            .attr("dy", "1.5em")
+            .style("text-anchor", "end")
+            .text("Cars");
+
     };
 
-
+    this.getArray = function(arr) {
+        console.log(arr);
+    }
     // Helper functions
     //Taken from http://bl.ocks.org/mbostock/7555321
     //Wraps SVG text
