@@ -204,13 +204,13 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     //     .range(d3.schemeCategory10) // schemeSet1 // schemeDark2
     // console.log(dotColour)
 
-    var dotColour = d3.scaleLinear().domain([1,103])
-        .range(["green","red"]);
+    // var dotColour = d3.scaleLinear().domain([1,103])
+    //     .range(["green","red"]);
 
-    // var dotColour = d3.scaleLinear()
-    //     .domain([25,15])
-    //     .range(d3.schemeBuGn[3]) // schemeSet1 // schemeDark2
-    // console.log(dotColour)
+    var dotColour = d3.scaleLinear()
+        .domain([25,15])
+        .range(d3.schemeBuGn[3]) // schemeSet1 // schemeDark2
+    console.log(dotColour)
 
     var legendScale = d3.scaleLinear()
         .domain(14,2)
@@ -386,8 +386,8 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                 return numItems * i + 20;
             })
             .attr("r", radius)
-            .style("fill", (d,i) => {return dotColour(i)})
-            .attr("stroke", (d,i) => {return dotColour(i)})
+            .style("fill", (d) => {return dotColour(d.accel)})
+            .attr("stroke", (d) => {return dotColour(d.accel)})
             .on("mouseover", function(event,d) {
                 let newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
                 let newY =  parseFloat(d3.select(this).attr('cy')) + 13;
