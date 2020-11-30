@@ -201,14 +201,16 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     // color scale for dots
     // var dotColour = d3.scaleOrdinal() // TODO original color scale
     //     .domain(colorLabels)
-    //     .range(d3.schemeTableau10) // schemeSet1 // schemeDark2
+    //     .range(d3.schemeCategory10) // schemeSet1 // schemeDark2
     // console.log(dotColour)
 
+    var dotColour = d3.scaleLinear().domain([1,103])
+        .range(["green","red"]);
 
-    var dotColour = d3.scaleLinear()
-        .domain([25,15])
-        .range(d3.schemeBuGn[3]) // schemeSet1 // schemeDark2
-    console.log(dotColour)
+    // var dotColour = d3.scaleLinear()
+    //     .domain([25,15])
+    //     .range(d3.schemeBuGn[3]) // schemeSet1 // schemeDark2
+    // console.log(dotColour)
 
     var legendScale = d3.scaleLinear()
         .domain(14,2)
@@ -384,8 +386,8 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                 return numItems * i + 20;
             })
             .attr("r", radius)
-            .style("fill", (d) => {return dotColour(d.accel)})
-            .attr("stroke", (d) => {return dotColour(d.accel)})
+            .style("fill", (d,i) => {return dotColour(i)})
+            .attr("stroke", (d,i) => {return dotColour(i)})
             .on("mouseover", function(event,d) {
                 let newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
                 let newY =  parseFloat(d3.select(this).attr('cy')) + 13;
@@ -417,7 +419,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                     clickedCars.splice(ind, 1);
                 }
                 console.log(clickedCars);
-                _radarChart1.getArray(clickedCars);
+                _radarChart1.updateRadarChart(clickedCars, curView);
             });
 
         var tooltip = chart.append("text")
@@ -466,6 +468,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         curYOffset = yMeanOffset2;
         curView = "brand";
         clickedCars = [];
+        _radarChart1.updateRadarChart(clickedCars, curView);
         maxX = setupAxis(brandData, xax);
         maxY = setupAxis(brandData, yax);
         console.log("max x: " + maxX.toString());
@@ -559,7 +562,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                     clickedCars.splice(ind, 1);
                 }
                 console.log(clickedCars);
-                _radarChart1.getArray(clickedCars);
+                _radarChart1.updateRadarChart(clickedCars, curView);
             })
 
         var tooltip = chart.append("text")
@@ -599,6 +602,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         curYOffset = yMeanOffset;
         curView = "carname";
         clickedCars = [];
+        _radarChart1.updateRadarChart(clickedCars, curView);
         console.log(data)
         maxX = setupAxis(data, xax);
         maxY = setupAxis(data, yax);
@@ -690,7 +694,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                     clickedCars.splice(ind, 1);
                 }
                 console.log(clickedCars);
-                _radarChart1.getArray(clickedCars);
+                _radarChart1.updateRadarChart(clickedCars, curview);
             })
             .merge(dots)
             .transition()

@@ -136,21 +136,6 @@ function removeColumns(arr){
 
 }
 
-function colorBlobDots() {
-    // The blobs are drawn one at a time. Get all the points to be that blobs color
-    // Increment the color after that blobs points are drawn, 8 points each
-    countblobs += 1;
-    if (countblobs <= 8){
-        return imgOpts.color(0);
-    }
-    else if( countblobs <= 16){
-        return imgOpts.color(1);
-    }
-    else{
-        return imgOpts.color(2);
-    }
-    //TODO 3 colours and 7 axis
-}
 
 // generate brand data from model data
 function genBrandData(data){
@@ -192,11 +177,7 @@ function filterSpecificBrands(data,names){ // TODO figure out if I need to do th
     console.log(result);
     return result
 }
-function genCompareJson(d, names){
-    var result = []
 
-
-}
 
 
 function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
@@ -207,7 +188,7 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
     let viewBox = document.getElementById(id).viewBox.baseVal;
     let totalWidth = viewBox.width;
     let totalHeight = viewBox.height;
-    let margins = {top: 70, right: 40, bottom: 70, left: 40};
+    let margins = {top: 100, right: 100, bottom: 70, left: 60};
     let innerWidth = totalWidth - margins.left - margins.right;
     let innerHeight = totalHeight - margins.top - margins.bottom;
 
@@ -244,9 +225,11 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
     };
 
     var gasCar = [
-        {   "accel": gasConst.avgAcceleration,
+        {   "brand": "Gasoline Car",
+            "carname": "Gasoline Car",
+            "accel": gasConst.avgAcceleration,
             "topspeed": gasConst.avgTopSpeed,
-            "range": gasConst.avgTrip,
+            "range": gasConst.avgRange,
             "efficiency": 0,
             "pricek": gasConst.avgPriceK,
             "price_km": 51}];
@@ -260,10 +243,10 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
     brandData = genBrandData(data);
     console.log(brandData);
 
-
+    console.log(carNames);
     // get the rows of data for the brand names in carNames
     var cars = filterSpecificBrands(brandData, carNames)
-
+    console.log(cars);
     let carsRadar =[];
     let gasCarsRadar =[];
     if(axis.length === 0){
@@ -272,10 +255,11 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
     }
     else{
         carsRadar = genAxisJson(cars,axis);
+        // carsRadar.push(genAxisJson(gasCar, axis)[0]); // This was for adding gascars to the first radar
     }
 
-
-    console.log(gasCarsRadar);
+    // console.log(carsRadar);
+    // console.log(gasCarsRadar);
 
     // TODO use this to put the gasCarsRadar into the cars
 
@@ -305,20 +289,21 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
     // Visualization rendering*************************************************************************************
 
 
-    //Remove whatever chart with the same id/class was present before
-    d3.select("#"+id).select("svg").remove(); //TODO This might have to be changed might not need "svg"
-
 
 
     this.draw = function(){
-        let chart = d3.select("#" + id); // chart is an svg container id need # for id's
+        // //Remove whatever chart with the same id/class was present before
+        // d3.select("#"+id).remove(); //TODO This might have to be changed might not need "svg"
+
+        var chart = d3.select("#" + id); // chart is an svg container id need # for id's
         chart.append("svg")
+            .attr("id", "radar")
             .attr("width",  imgOpts.w + imgOpts.margin.left + imgOpts.margin.right)
             .attr("height", imgOpts.h + imgOpts.margin.top + imgOpts.margin.bottom)
             .attr("class", "radar"+id);
 
         var g = chart.append("g")
-            .attr("transform", "translate(" + (imgOpts.w/2 + imgOpts.margin.left) + "," +
+            .attr("transform", "translate(" + (imgOpts.w/2 ) + "," +
                 (imgOpts.h/2 + imgOpts.margin.top) + ")");
 
         // Glow filter //TODO read about this glow filter
@@ -528,7 +513,7 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
         // Legend use chartTitle as the text
         var legend = chart.append("g")
             .attr("class", "legend-group").selectAll(".legend")
-            .data(color.domain())
+            .data(imgOpts.color.domain())
             .enter().append("g")
             .attr("class", "legend")
             .attr("transform" , function (d,i) {
@@ -538,19 +523,18 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
         // draw legend colored rectangles
 
         legend.append("rect")
-            .attr("x", innerWidth + 70)
+            .attr("x", innerWidth + 200)
             .attr("width", 18)
             .attr("height", 9)
-            .style("fill", (d,i)=> color(d));
+            .style("fill", (d,i)=> imgOpts.color(d));
 
         // draw legend text
         legend.append("text")
-            .attr("x", innerWidth+160)
+            .attr("x", innerWidth+185)
             .attr("y", 5)
             .attr("dy", ".35em")
             .style("text-anchor", "end")
             .text(function(d, i) {
-                console.log(d);
                 console.log(carNames[i])
                 return "- "+carNames[i];
             });
@@ -560,18 +544,57 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
             .attr("class", "legend")
             .attr("transform", "translate(-100,0)")
             .append("text")
-            .attr("x", innerWidth+120)
-            .attr("y", 0)
+            .attr("x", innerWidth+160)
+            .attr("y", -3)
             .attr("dy", "1.5em")
             .style("text-anchor", "end")
             .text("Cars");
 
     };
 
-    this.getArray = function(arr) {
-        console.log(arr);
+    this.updateRadarChart = function(newData, legendCategory) {
+        console.log(newData);
+        carsRadar = genAxisJson(newData,axis);
+        console.log(carsRadar);
+
+        var chart = d3.select("#" + id)
+        chart.selectAll('*').remove()
+        // reset scale and max value
+        let newMax = getMaxRange(newData);
+        rScale.domain([0, newMax]);
+        imgOpts.maxValue = newMax;
+
+        //reset the names for the legends
+        let newCarNames = getCarNames(newData, legendCategory);
+        carNames = newCarNames;
+        imgOpts.color = d3.scaleOrdinal(d3.schemeCategory10)
+        this.draw();
+
+
     }
     // Helper functions
+
+    function getCarNames(arr, col){
+        let result = [];
+        for(let i = 0; i < arr.length; i++){
+            result.push(arr[i][col]);
+        }
+        return result;
+    }
+
+    function getMaxRange(arr){
+        let newMax = 0;
+        for(let i = 0; i< arr.length; i++){
+            if(arr[i]["range"] > newMax){
+                newMax = arr[i]["range"]
+            }
+            if(arr[i]["price_km"] > newMax){
+                newMax = arr[i]["price_km"]
+            }
+        }
+        return newMax;
+    }
+
     //Taken from http://bl.ocks.org/mbostock/7555321
     //Wraps SVG text
     function wrap(text, width) {
