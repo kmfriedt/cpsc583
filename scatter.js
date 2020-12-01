@@ -350,8 +350,8 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                 return numItems * i + 20;
             })
             .attr("r", radius)
-            .style("fill", (d) => {return dotColour(d.accel)})
-            .attr("stroke", (d) => {return dotColour(d.accel)})
+            .attr("fill", "#4fb30e")
+            .attr("stroke", "black")
             .on("mouseover", function(event,d) {
                 let newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
                 let newY =  parseFloat(d3.select(this).attr('cy')) + 13;
@@ -369,15 +369,15 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                     .style("opacity", 0);
             })
             .on("mousedown", function(event, d) {
-                let currentStroke = d3.select(this).attr("stroke");
+                let currentFill = d3.select(this).attr("fill");
 
-                if(currentStroke !== "black"){
-                    this.setAttribute("stroke", "black");
+                if(currentFill !== "#8e1215"){
+                    this.setAttribute("fill", "#8e1215");
                     // add this to the list
                     clickedCars.push(d);
                 }
                 else{
-                    this.setAttribute("stroke", (d) => {return dotColour(d.accel)})
+                    this.setAttribute("fill","#4fb308" )
                     // remove this from the list
                     let ind = searchClickedArrayM(d.carname, clickedCars);
                     clickedCars.splice(ind, 1);
@@ -396,72 +396,6 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
             .attr("y", 300)
             .attr("r", 0)
             .remove()
-
-
-
-
-        var legendAxis = d3.axisRight()
-            .scale(legendScale)
-            .tickSize(6)
-            .ticks(13);
-        // chart.append("svg")
-        //     .attr("height", legendHeight + margins.top)
-        //     .attr("width", 25)
-        //     .style("right", "0px")
-        //     .style("top", "0px")
-
-        chart.append("g")
-            .attr("class", "legendAxis")
-            .attr("transform", "translate(" + (innerWidth + margins.left*2) + "," + (margins.top) + ")")
-            .call(legendAxis);
-
-        // // Brushing
-        //
-        // chart.append("g")
-        //     .attr("class", "brush")
-        //     .call(brush);
-
-        // // Brushing set up
-        let scatBrush = d3.brush()
-            .extent([[80,20], [1000, 540]])
-            .on("start brush", brushFilterChart);
-            // .on("end", (d) => );
-
-        chart.append('g')
-            .call(scatBrush);
-        console.log(d3.select(dots).style("fill"));
-        dots.each(function(d){
-            console.log(d);});
-
-        function brushFilterChart(event){
-            let extent = event.selection
-            console.log(extent);
-
-            dots.each(function(d){
-                console.log(d);
-                if (isBrushed(extent, xScale(d["price"]), yScale(d["range"]))) { // TODO change these if you change y axis
-                        console.log("TRUE");
-
-                      // add it to the filtered data
-
-                    } else {
-                        console.log("FALSE")
-                        // don't add it to the list
-                    }
-            });
-
-            function isBrushed(area, cx, cy){
-                var x0 = area[0][0],
-                    x1 = area[1][0],
-                    y0 = area[0][1],
-                    y1 = area[1][1];
-                return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
-            }
-
-        };
-
-
-
 
 
     };
@@ -535,8 +469,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
 
         let radius = innerWidth /  brandData.length / 2
 
-        dots.attr("stroke", (d) => {return dotColour(d.accel)})
-            .on("mouseover", function(event,d) {
+        dots.on("mouseover", function(event,d) {
                 newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
                 newY =  parseFloat(d3.select(this).attr('cy')) + 13;
                 // console.log(d.car) // This is not a value anymore
@@ -553,22 +486,22 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                     .style("opacity", 0);
             })
             .on("mousedown", function(event, d) {
-                let currentStroke = d3.select(this).attr("stroke");
+                let currentFill = d3.select(this).attr("fill");
 
-                if(currentStroke !== "black"){
-                    this.setAttribute("stroke", "black");
+                if(currentFill !== "#8e1215"){
+                    this.setAttribute("fill", "#8e1215");
                     // add this to the list
                     clickedCars.push(d);
                 }
                 else{
-                    this.setAttribute("stroke", (d) => {return dotColour(d.accel)})
+                    this.setAttribute("fill","#4fb308" )
                     // remove this from the list
                     let ind = searchClickedArrayB(d.brand, clickedCars);
                     clickedCars.splice(ind, 1);
                 }
                 console.log(clickedCars);
                 _radarChart1.updateRadarChart(clickedCars, curView);
-            })
+            });
 
         var tooltip = chart.append("text")
             .attr("class", "tooltip")
@@ -583,10 +516,8 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
             .attr("cy", (d,i) => {
                 return yScale(d[yax]) - radius;
             })
-            .style("fill", (d) => {
-                return dotColour(d.accel);
-            })
-            .attr("stroke", (d) => {return dotColour(d.accel)})
+            .attr("fill", "#4fb30e")
+            .attr("stroke", "black");
 
         d3.selectAll(".ygrid").transition().duration(750)
             .call(d3.axisLeft(yScale)
@@ -665,8 +596,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         // .duration(750)
 
         let radius = innerWidth /  data.length / 2
-        dots.attr("stroke", (d) => {return dotColour(d.accel)})
-            .enter()
+        dots.enter()
             .append('circle')
             .on("mouseover", function(event,d) {
                 newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
@@ -685,21 +615,21 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                     .style("opacity", 0);
             })
             .on("mousedown", function(event, d) {
-                let currentStroke = d3.select(this).attr("stroke");
+                let currentFill = d3.select(this).attr("fill");
 
-                if(currentStroke !== "black"){
-                    this.setAttribute("stroke", "black");
+                if(currentFill !== "#8e1215"){
+                    this.setAttribute("fill", "#8e1215");
                     // add this to the list
                     clickedCars.push(d);
                 }
                 else{
-                    this.setAttribute("stroke", (d) => {return dotColour(d.accel)})
+                    this.setAttribute("fill","#4fb308" )
                     // remove this from the list
-                    let ind = searchClickedArrayB(d.brand, clickedCars);
+                    let ind = searchClickedArrayM(d.carname, clickedCars);
                     clickedCars.splice(ind, 1);
                 }
                 console.log(clickedCars);
-                _radarChart1.updateRadarChart(clickedCars, curview);
+                _radarChart1.updateRadarChart(clickedCars, curView);
             })
             .merge(dots)
             .transition()
@@ -711,9 +641,8 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
             .attr("cy", (d) => {
                 return yScale(d[yax]) - radius;
             })
-            .style("fill", (d) => {
-                return dotColour(d.accel);
-            });
+            .attr("fill", "#4fb30e")
+            .attr("stroke", "black");
 
 
         var tooltip = chart.append("text")
