@@ -178,12 +178,12 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     let curYOffset = yMeanOffset; // used when switching between views
     let curView = "car";
 
-
+    let filteredBrandData = [];
+    let filteredModelData = [];
     var brandData = genBrandGroups(data);
     var colorLabels = genColorLabels(data);
 
-    var filteredModelData; // For when we want to filter the data, keep original full data available
-    // filterData(); // TODO finish this function
+
     console.log(colorLabels)
     console.log(data);
     console.log(brandData);
@@ -248,53 +248,17 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     var xAvg = gasConst[avg1];
     var yAvg = gasConst[avg2];
 
-
-    //
-    // // Brushing set up
-    // let brush = d3.brush().on("end", this.brushended),
-    //     idleTimeout,
-    //     idleDelay = 1000;
-    //
-    //
-    // this.idled = function() {
-    //     idleTimeout = null;
-    // }
-    //
-    // this.zoom = function() {
-    //     var t = chart.transition().duration(750);
-    //     chart.select(".xAxis").transition(t).call(xAxis);
-    //     chart.select(".yAxis").transition(t).call(yAxis);
-    //     chart.selectAll("circle").transition(t)
-    //         .attr("cx", function(d) {
-    //             console.log(d)
-    //             return xScale(d[0]); })
-    //         .attr("cy", function(d) {
-    //             console.log(d)
-    //             return yScale(d[1]); });
-    // }
-    //
-    // this.brushended = function(event) {
-    //     var s = event.selection;
-    //     if(s === null){
-    //         if (!idleTimeout) return idleTimeout = setTimeout(this.idled, idleDelay);
-    //         xScale.domain(xDomain);
-    //         yScale.domain(yDomain);
-    //     } else {
-    //         xScale.domain([s[0][0], s[1][0]].map(xScale.invert, xScale));
-    //         yScale.domain([s[1][1], s[0][1]].map(yScale.invert, yScale));
-    //         chart.select(".brush").call(brush.move, null);
-    //     }
-    //     this.zoom();
-    // }
-
-
-
     //Initialize chart selection
 
     let chart = d3.select("#" + id); // chart is an svg container id need # for id's
 
     drawBackground(chart, margins.left, margins.top, innerWidth, innerHeight)
-    //Draw the background
+
+
+
+
+
+
 
     this.draw = function(){
 
@@ -456,6 +420,47 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         // chart.append("g")
         //     .attr("class", "brush")
         //     .call(brush);
+
+        // // Brushing set up
+        let scatBrush = d3.brush()
+            .extent([[80,20], [1000, 540]])
+            .on("start brush", brushFilterChart);
+            // .on("end", (d) => );
+
+        chart.append('g')
+            .call(scatBrush);
+        console.log(d3.select(dots).style("fill"));
+        dots.each(function(d){
+            console.log(d);});
+
+        function brushFilterChart(event){
+            let extent = event.selection
+            console.log(extent);
+
+            dots.each(function(d){
+                console.log(d);
+                if (isBrushed(extent, xScale(d["price"]), yScale(d["range"]))) { // TODO change these if you change y axis
+                        console.log("TRUE");
+
+                      // add it to the filtered data
+
+                    } else {
+                        console.log("FALSE")
+                        // don't add it to the list
+                    }
+            });
+
+            function isBrushed(area, cx, cy){
+                var x0 = area[0][0],
+                    x1 = area[1][0],
+                    y0 = area[0][1],
+                    y1 = area[1][1];
+                return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
+            }
+
+        };
+
+
 
 
 
