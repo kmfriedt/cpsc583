@@ -9,7 +9,7 @@ var _scatChart;
 
 var _brandChart;
 
-const margins = {top: 20, right: 200, bottom: 60, left: 80};
+const margins = {top: 20, right: 80, bottom: 60, left: 80};
 
 function setupModel(id, xax, yax, xtitle, ytitle, avg1, avg2){
     //Changed this to import the brands only
@@ -166,7 +166,7 @@ function setupAxis(data, xax){
     return max;
 };
 
-function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
+function scatterChart(id, dataOG, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     let viewBox = document.getElementById(id).viewBox.baseVal;
     let totalWidth = viewBox.width;
     let totalHeight = viewBox.height;
@@ -177,8 +177,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     let yMeanOffset2 = 26;
     let curYOffset = yMeanOffset; // used when switching between views
     let curView = "car";
-
-    let filteredBrandData = [];
+    let data = dataOG;
     let filteredModelData = [];
     var brandData = genBrandGroups(data);
     var colorLabels = genColorLabels(data);
@@ -187,7 +186,23 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     console.log(colorLabels)
     console.log(data);
     console.log(brandData);
-
+    let blankCar = {
+        accel: 10,
+        body: "Sedan",
+        brand: "Blank",
+        car: "Blank",
+        carname: "Blank",
+        charge: 210,
+        efficiency: 153,
+        power: "FWD",
+        price: 0,
+        price_km: 0,
+        pricek: 0,
+        range: 0,
+        seats: 0,
+        time_charge: 0,
+        topspeed: 0
+    };
 
     //Constants for graphs
     var gasConst = {
@@ -211,14 +226,6 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         .domain([25,15])
         .range(d3.schemeBuGn[3]) // schemeSet1 // schemeDark2
     console.log(dotColour)
-
-    var legendScale = d3.scaleLinear()
-        .domain(14,2)
-        .range([1, 75])
-
-    let legendHeight = 130
-
-
 
 
     // Setup scales for axis
@@ -255,7 +262,63 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
     drawBackground(chart, margins.left, margins.top, innerWidth, innerHeight)
 
 
+    this.filterData = function(body, power, seats){
 
+        let newData = dataOG;
+        if(curView !=="brand" ) {
+
+            if (body === "none") {
+                // use all the data
+                console.log(newData);
+            } else {
+                // filter out cars with out this body style
+                var temp1 = [];
+                newData.forEach(function(d) {
+                    if(d.body === body){
+                        temp1.push(d);
+                    }
+                })
+                newData = temp1;
+                console.log(newData);
+            }
+            if (power === "none") {
+                // use all the data
+                console.log(newData);
+            } else {
+                // filter out cars with out this body style
+                var temp2 = [];
+                newData.forEach(function(d) {
+                    console.log(d.power);
+                    if(d.power === power){
+                        temp2.push(d);
+                    }
+                })
+               newData = temp2;
+                console.log(newData);
+            }
+            if (seats === "none") {
+                // use all the data
+                console.log(newData);
+            } else {
+                // filter out cars with out this body style
+                var temp3 = [];
+                newData.forEach(function(d) {
+                    console.log(d.seats);
+                    if(d.seats === seats){
+                        temp3.push(d);
+                    }
+                })
+                newData = temp3;
+                console.log(newData);
+            }
+        }
+        if(newData.length === 0){
+            newData = [blankCar];
+        }
+        data = newData;
+
+        this.modelView();
+    };
 
 
 
@@ -321,7 +384,8 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         meanXLine(xAvg, chart, xScale, margins.left, margins.top, margins.bottom, totalHeight, xMeanOffset);
 
         let numItems = innerWidth / (data.length + 2);
-        let radius = innerWidth / data.length / 2;
+        let radius = 4.7;
+
         console.log("Radius: " + radius.toString())
         let dotPadding = 40
 
@@ -345,7 +409,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                 // console.log(scale(d[yaxis]))
                 // console.log(typeof scale(d[yaxis]))
                 if(typeof yScale(d[yax]) === "number"){
-                    return yScale(d[yax]) - radius;
+                    return yScale(d[yax]) + radius;
                 }
                 return numItems * i + 20;
             })
@@ -404,18 +468,19 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         // use brandData
         //SETUP SCALES AGAIN
         // get maxX and maxY
+        console.log(brandData);
         curYOffset = yMeanOffset2;
         curView = "brand";
         clickedCars = [];
         _radarChart1.updateRadarChart(clickedCars, curView);
         maxX = setupAxis(brandData, xax);
         maxY = setupAxis(brandData, yax);
-        console.log("max x: " + maxX.toString());
-        console.log("max y: " + maxY.toString());
+
 
         // re-scale //TODO to get the new axis have you re-scale it
         xScale.domain([0, maxX]).nice();
         yScale.domain([0, maxY]).nice();
+
         // setup a new axis with the new scale
         var newXAxis = d3.axisBottom(xScale);
 
@@ -431,8 +496,6 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
             .duration(750)
             .call(newYAxis)
 
-
-        console.log(yScale(160))
 
         // Draw the mean lines
         chart.select(".yMean")
@@ -467,13 +530,16 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
             .attr("cy", innerWidth + margins.top)
             .remove()
 
-        let radius = innerWidth /  brandData.length / 2
+        let radius = 13;
 
-        dots.on("mouseover", function(event,d) {
+
+        dots.enter()
+            .append("circle")
+            .on("mouseover", function(event,d) {
                 newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
                 newY =  parseFloat(d3.select(this).attr('cy')) + 13;
-                // console.log(d.car) // This is not a value anymore
-                // console.log(d.value)
+
+                console.log(d)
                 tooltip
                     .attr('x', newX)
                     .attr('y', newY)
@@ -501,7 +567,19 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                 }
                 console.log(clickedCars);
                 _radarChart1.updateRadarChart(clickedCars, curView);
-            });
+            })
+            .merge(dots)
+            .transition()
+            .duration(750)
+            .attr("r", radius)
+            .attr("cx", (d) => {
+                return xScale(d[xax]);
+            } )
+            .attr("cy", (d) => {
+                return yScale(d[yax]) + radius ;
+            })
+            .attr("fill", "#4fb30e")
+            .attr("stroke", "black");
 
         var tooltip = chart.append("text")
             .attr("class", "tooltip")
@@ -542,8 +620,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
         console.log(data)
         maxX = setupAxis(data, xax);
         maxY = setupAxis(data, yax);
-        console.log("max x: " + maxX.toString());
-        console.log("max y: " + maxY.toString());
+
 
         // re-scale //TODO to get the new axis have you re-scale it
         xScale.domain([0, maxX]).nice();
@@ -592,16 +669,17 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
 
         dots.exit()
             .remove()
-        // .transition()
-        // .duration(750)
+            .attr("cx", margins.left)
+            .attr("cy", innerWidth + margins.top)
+            .transition()
+            .duration(750)
 
-        let radius = innerWidth /  data.length / 2
+        let radius = 4.7;
         dots.enter()
             .append('circle')
             .on("mouseover", function(event,d) {
                 newX =  parseFloat(d3.select(this).attr('cx')) + 25 ;
                 newY =  parseFloat(d3.select(this).attr('cy')) + 13;
-                console.log(d.car)
                 // console.log(d.value)
                 tooltip
                     .attr('x', newX)
@@ -639,7 +717,7 @@ function scatterChart(id, data, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                 return xScale(d[xax]);
             } )
             .attr("cy", (d) => {
-                return yScale(d[yax]) - radius;
+                return yScale(d[yax]) + radius ;
             })
             .attr("fill", "#4fb30e")
             .attr("stroke", "black");
@@ -748,3 +826,28 @@ function changeRange(){
 
     _scatChart.updateYMean(parseFloat(amount));
 }
+
+function filterData(){
+    let body = document.getElementById("filterBody");
+    let power = document.getElementById("filterPower");
+    let seats = document.getElementById("filterSeats");
+
+    if(body) {
+
+        body = body.options[body.selectedIndex].value;
+        console.log(body);
+    }
+    if(power) {
+
+        power = power.options[power.selectedIndex].value;
+        console.log(power);
+    }
+    if(seats) {
+
+        seats = seats.options[seats.selectedIndex].value;
+        console.log(seats);
+    }
+
+    _scatChart.filterData(body, power, seats);
+};
+

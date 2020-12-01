@@ -23,7 +23,7 @@
         I plan to allow the users to change the price to one that they would be willing to pay for a vehicle.
         I also plan to allow them to change the range that they would want.
         I also need to generate a legend for the graph. </p>
-    <svg id="scatter2" width="1200" height="600" viewBox="0 0 1200 600">
+    <svg id="scatter2" width="1300" height="640" viewBox="0 0 1300 640">
         <rect class="bg"></rect>
     </svg>
 
@@ -31,9 +31,54 @@
     <script>
         setupModel("scatter2", "price", "range", "Price (CDN$)", "Range (km)", "avgPrice", "avgTrip");
     </script>
-    <button id="switchDots", onclick="switchDots()">Switch to Brand View</button>
-    <input id="changePrice" type="text" onchange="changePrice()" value=33500>
-    <input id="changeRange" type="text" onchange="changeRange()" value=160>
+    <div style="float:left;margin-right:20px;">
+
+        <button id="switchDots", onclick="switchDots()">Switch to Brand View</button>
+    </div>
+
+    <div style="float:right;">
+        <label for="changePrice">Select Price</label>
+        <input id="changePrice" type="text" onchange="changePrice()" value=33500>
+        <label for="changeRange">Select Range</label>
+        <input id="changeRange" type="text" onchange="changeRange()" value=160>
+    </div>
+    <div style="float:right;">
+        <label for="filterBody">Body Style:</label>
+        <select id="filterBody" onchange="filterData()">
+            <option value="none"></option>
+            <option value="SUV">SUV</option>
+            <option value="Sedan">Sedan</option>
+            <option value="Hatchback">Hatchback</option>
+            <option value="Pickup">Pickup</option>
+        </select>
+
+    </div>
+    <div style="float:right;">
+        <label for="filterPower">Drive Wheels:</label>
+        <select id="filterPower" onchange="filterData()">
+            <option value="none"></option>
+            <option value="AWD">AWD</option>
+            <option value="FWD">FWD</option>
+            <option value="RWD">RWD</option>
+        </select>
+
+    </div>
+
+    <div style="float:right;">
+        <label for="filterSeats">Number of Seats:</label>
+        <select id="filterSeats" onchange="filterData()">
+            <option value="none"></option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+        </select>
+
+    </div>
+
+
+
+
 
 <!--    <h1>Brand Price and Range</h1>-->
 <!--    <svg id="scatter3" width="800" height="600" viewBox="0 0 800 600">-->

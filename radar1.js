@@ -200,7 +200,7 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
         w: innerWidth,
         h: innerHeight,
         margin: margins, //TODO may have to get rid of margins and put it's data here
-        maxValue: 550,
+        maxValue: 700,
         levels: 5,
         roundStrokes: true,
         color: color,
@@ -248,7 +248,7 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
     var cars = filterSpecificBrands(brandData, carNames)
     console.log(cars);
     let carsRadar =[];
-    let gasCarsRadar =[];
+    let gasCarsRadar = genAxisJson(gasCar, axis);
     if(axis.length === 0){
         axis = ["accel", "topspeed", "range", "efficiency", "pricek", "price_km"];
         carsRadar = genAxisJson(gasCar, axis);
@@ -258,9 +258,10 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
         // carsRadar.push(genAxisJson(gasCar, axis)[0]); // This was for adding gascars to the first radar
     }
 
+    console.log(carsRadar);
+    console.log(gasCarsRadar);
+    // carsRadar.push(gasCarsRadar[0]);
     // console.log(carsRadar);
-    // console.log(gasCarsRadar);
-
     // TODO use this to put the gasCarsRadar into the cars
 
     //carsRadar.push(gasCarsRadar[0]);
@@ -530,12 +531,12 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
 
         // draw legend text
         legend.append("text")
+            .data(carsRadar)
             .attr("x", innerWidth+185)
             .attr("y", 5)
             .attr("dy", ".35em")
             .style("text-anchor", "end")
-            .text(function(d, i) {
-                console.log(carNames[i])
+            .text(function(d, i) { // TODO wanted to add the brand but it's not in here.
                 return "- "+carNames[i];
             });
         // put title on the legend

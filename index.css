@@ -20,7 +20,10 @@ body {
     text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
     cursor: default;
 }
-
+label{
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+}
 .legend {
     font-family: 'Raleway', sans-serif;
     fill: #333333;
