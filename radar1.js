@@ -4,8 +4,6 @@
 // and updated to work with v6
 
 var _radarChart1;
-var _radarChart2;
-var _radarChartVS;
 function setupRadar1(id){
     let carNames = ["Tesla", "Audi", "Volkswagen", "Smart"];
     let axis = ["range", "efficiency", "topspeed", "pricek", "price_km"]
@@ -18,29 +16,18 @@ function setupRadar1(id){
 
 
 };
-// TODO for some reason time_charge isn't working don't know why...
-function setupRadar2(id){
 
-    let axis = ["accel", "seats", "time_charge"]
-    //Changed this to import the brands only
-    d3.csv("evdata2.csv").then(function (d){
-        _radarChart2 = new radarChart(id, d, axis, 10, "Selected Electric Car Compared to Gasoline Car");
-        _radarChart2.draw();
-    });
-
-};
-
-function setupRadarVS(id){
-    let axis = [];
-    let carNames = ["Avg Gas Car"];
-    //Changed this to import the brands only
-    d3.csv("evdata2.csv").then(function (d){
-        _radarChartVS = new radarChart(id, d, axis, 200,
-            "Selected Electric Car Compared to Gasoline Car", carNames )
-        _radarChartVS.draw();
-    });
-
-};
+// function setupRadarVS(id){
+//     let axis = [];
+//     let carNames = ["Avg Gas Car"];
+//     //Changed this to import the brands only
+//     d3.csv("evdata2.csv").then(function (d){
+//         _radarChartVS = new radarChart(id, d, axis, 200,
+//             "Selected Electric Car Compared to Gasoline Car", carNames )
+//         _radarChartVS.draw();
+//     });
+//
+// };
 
 
 /**
@@ -61,79 +48,6 @@ function genAxisJson(cars, cols) {
         result.push(second)
     }
     return result
-}
-
-// These functions were used for the example in my submission
-function genModelRange(cars, cols) { //TODO make generic
-
-    var result = [];
-    var second = [];
-    for (var i = 0; i < cars.length; i ++) {
-        var feed = {axis: cols[i], value: cars[i].range}
-        second.push(feed);
-    }
-    result.push(second);
-    return result
-}
-function genModelRange2(cars, cols) { //TODO maybe use this for 3rd version
-
-    var result = [];
-    for (var i = 0; i < cars.length; i ++) {
-        var second = []
-        for(var j= 0; j< cols.length; j++){
-            var feed = {axis: cols[j], value: cars[i].range}
-            second.push(feed)
-        }
-        second.push({axis: "origin", value: 0})
-        result.push(second)
-    }
-    return result
-}
-function genModelAccel2(cars, cols) { //TODO maybe use this for 3rd version
-
-    var result = [];
-    for (var i = 0; i < cars.length; i ++) {
-        var second = []
-        for(var j= 0; j< cols.length; j++){
-            var feed = {axis: cols[j], value: cars[i].accel}
-            second.push(feed)
-        }
-        second.push({axis: "origin", value: 0})
-        result.push(second)
-    }
-    return result
-}
-function genModelAccel(cars, cols) {
-
-    var result = [];
-    var second = [];
-    for (var i = 0; i < cars.length; i ++) {
-        var feed = {axis: cols[i], value: cars[i].accel}
-        second.push(feed);
-    }
-    result.push(second);
-    return result
-}
-
-// this filters the brand array to only include the brands you want
-function filterBrandArray(names, data) { // TODO figure out if you need this at all
-    var cars = []
-    for (var i = 0; i < names.length; i++) {
-        cars.push(data.get(names[i]))
-    }
-    console.log(cars)
-    return cars
-}
-
-// This gets rid of columns that we don't want to use as axes
-function removeColumns(arr){
-    // removes brand accel efficiency charge price price_range
-    var col1 = arr.slice(3,6),
-        col2 = arr.slice(11,13),
-        arr = col1.concat(col2);
-
-    return arr;
-
 }
 
 
