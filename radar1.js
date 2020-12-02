@@ -6,7 +6,7 @@
 var _radarChart1;
 function setupRadar1(id){
     let carNames = ["Tesla", "Audi", "Volkswagen", "Smart"];
-    let axis = ["range", "efficiency", "topspeed", "pricek", "price_km"]
+    let axis = ["range", "efficiency", "topspeed", "pricek", "price_km"];
     //Changed this to import the brands only
     d3.csv("evdata2.csv").then(function (d){
         _radarChart1 = new radarChart(id, d, axis, 550, "Electric Car Comparison", carNames);
@@ -105,7 +105,8 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
     let margins = {top: 100, right: 100, bottom: 70, left: 60};
     let innerWidth = totalWidth - margins.left - margins.right;
     let innerHeight = totalHeight - margins.top - margins.bottom;
-
+    // ["range", "efficiency", "topspeed", "pricek", "price_km"]
+    let radarAxisNames = ["Range (km)", "Efficiency (Wh/km)", "Top Speed (km/h)", "Price ($1000s)", "Price/km of Range"]
     //Setup the Chart Options
     let color = d3.scaleOrdinal(d3.schemeCategory10)
 
@@ -262,7 +263,7 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
         //Axes rendering
         //Create the straight lines radiating outward from the center
         var axis = axisGrid.selectAll(".axis")
-            .data(allAxis)
+            .data(radarAxisNames) // was allAxis
             .enter()
             .append("g")
             .attr("class", "axis");
@@ -485,14 +486,23 @@ function radarChart(id, data, axis, tempMaxValue, chartTitle, carNames) {
         imgOpts.color = d3.scaleOrdinal(d3.schemeCategory10)
         this.draw();
 
-
     }
     // Helper functions
 
     function getCarNames(arr, col){
         let result = [];
-        for(let i = 0; i < arr.length; i++){
-            result.push(arr[i][col]);
+        if(col === "brand") { // Then brand view
+            for (let i = 0; i < arr.length; i++) {
+                result.push(arr[i][col]);
+            }
+        }
+        else{ // Then the car view add the brand
+            for (let i = 0; i < arr.length; i++) {
+                console.log(arr[i]["brand"]);
+                console.log(arr[i][col]);
+
+                result.push(arr[i]["brand"] + " " + arr[i][col]);
+            }
         }
         return result;
     }

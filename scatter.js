@@ -447,6 +447,7 @@ function scatterChart(id, dataOG, xax, yax, xtitle, ytitle, avg1, avg2 ) {
                     clickedCars.splice(ind, 1);
                 }
                 console.log(clickedCars);
+                console.log(curView);
                 _radarChart1.updateRadarChart(clickedCars, curView);
             });
 
