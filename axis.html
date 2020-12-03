@@ -15,14 +15,11 @@
     <script src="scatter.js"></script>
     <script src="//d3js.org/d3-scale-chromatic.v0.3.min.js"></script>
 
-    <h1>Price and Range</h1>
-    <p>The scatter chart is not my primary visualization.
-        It is mainly there to allow the user to narrow down on which cars it would like to look at.
-        The first variation is price versus range for each model.
-        This chart was quite cramped so I did one with the cars grouped by brand as well.
-        I plan to allow the users to change the price to one that they would be willing to pay for a vehicle.
-        I also plan to allow them to change the range that they would want.
-        I also need to generate a legend for the graph. </p>
+    <h1>Find a Car in your Price Range</h1>
+    <h3>Range anxiety is one of the biggest barriers to purchasing an electric car. When in reality 93% of trips are less than 160km.
+    An electric car can substitute the vast majority of your driving.</h3>
+    <h2>Use the inputs and drop downs below to help you find an electric car that suits your needs.</h2>
+    <h2>Select individual cars by clicking on their dot and use the radar chart below to compare their features.</h2>
     <svg id="scatter2" width="1300" height="640" viewBox="0 0 1300 640">
         <rect class="bg"></rect>
     </svg>
@@ -78,13 +75,7 @@
     </div>
 
 
-    <h1>4 Brands and 6 features</h1>
-    <p>This radar chart was adapted from the work done by Nadieh Bremmer
-        found at http://bl.ocks.org/nbremer/21746a9668ffdf6d8242.
-        I had to adjust the code to work with version 6 and with m data.
-        This variation looked at 4 vehicles and 6 key features of those vehicles.
-        I would like to add more features to fill in the chart a little more. I also found that
-        I need to order the blobs to make sure that you can highlight each of them with mouse over. </p>
+    <h1 style="float:left;">Compare your Selected Cars</h1>
 
     <svg id="radar1" width="700" height="400" viewBox="0 0 700 400">
         <rect class="bg"></rect>
